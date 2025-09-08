@@ -1,6 +1,16 @@
 /* global LSF_VERSION */
 
-import { destroy, detach, flow, getEnv, getParent, getSnapshot, isRoot, types, walk } from "mobx-state-tree";
+import {
+  destroy,
+  detach,
+  flow,
+  getEnv,
+  getParent,
+  getSnapshot,
+  isRoot,
+  types,
+  walk,
+} from "mobx-state-tree";
 
 import uniqBy from "lodash/uniqBy";
 import InfoModal from "../components/Infomodal/Infomodal";
@@ -53,7 +63,7 @@ export default types
         taskId: types.number,
         annotationId: types.maybeNull(types.string),
       }),
-      [],
+      []
     ),
 
     /**
@@ -85,7 +95,10 @@ export default types
     /**
      * User of Label Studio
      */
-    user: types.optional(types.maybeNull(types.safeReference(UserExtended)), null),
+    user: types.optional(
+      types.maybeNull(types.safeReference(UserExtended)),
+      null
+    ),
 
     /**
      * Debug for development environment
@@ -155,7 +168,9 @@ export default types
 
     users: types.optional(types.array(UserExtended), []),
 
-    userLabels: isFF(FF_DEV_1536) ? types.optional(UserLabels, { controls: {} }) : types.undefined,
+    userLabels: isFF(FF_DEV_1536)
+      ? types.optional(UserLabels, { controls: {} })
+      : types.undefined,
 
     queueTotal: types.optional(types.number, 0),
 
@@ -167,7 +182,11 @@ export default types
     commentClassificationConfig: types.maybeNull(types.string),
 
     customButtons: types.map(
-      types.union(types.string, CustomButton, types.array(types.union(types.string, CustomButton))),
+      types.union(
+        types.string,
+        CustomButton,
+        types.array(types.union(types.string, CustomButton))
+      )
     ),
   })
   .preProcessSnapshot((sn) => {
@@ -193,7 +212,8 @@ export default types
     return {
       ...sn,
       _autoAnnotation: localStorage.getItem("autoAnnotation") === "true",
-      _autoAcceptSuggestions: localStorage.getItem("autoAcceptSuggestions") === "true",
+      _autoAcceptSuggestions:
+        localStorage.getItem("autoAcceptSuggestions") === "true",
     };
   })
   .volatile(() => ({
@@ -210,12 +230,16 @@ export default types
     },
     get hasSegmentation() {
       // not an object and not a classification
-      const isSegmentation = (t) => !t.getAvailableStates && !t.perRegionVisible;
+      const isSegmentation = (t) =>
+        !t.getAvailableStates && !t.perRegionVisible;
 
-      return Array.from(self.annotationStore.names.values()).some(isSegmentation);
+      return Array.from(self.annotationStore.names.values()).some(
+        isSegmentation
+      );
     },
     get canGoNextTask() {
-      const hasHistory = self.task && self.taskHistory && self.taskHistory.length > 1;
+      const hasHistory =
+        self.task && self.taskHistory && self.taskHistory.length > 1;
 
       if (hasHistory) {
         const lastTaskId = self.taskHistory[self.taskHistory.length - 1].taskId;
@@ -225,7 +249,8 @@ export default types
       return false;
     },
     get canGoPrevTask() {
-      const hasHistory = self.task && self.taskHistory && self.taskHistory.length > 1;
+      const hasHistory =
+        self.task && self.taskHistory && self.taskHistory.length > 1;
 
       if (hasHistory) {
         const firstTaskId = self.taskHistory[0].taskId;
@@ -343,14 +368,17 @@ export default types
       if (self.hasInterface("submit", "update", "review")) {
         hotkeys.addNamed("annotation:submit", () => {
           const annotationStore = self.annotationStore;
-          const shouldDenyEmptyAnnotation = self.hasInterface("annotations:deny-empty");
+          const shouldDenyEmptyAnnotation = self.hasInterface(
+            "annotations:deny-empty"
+          );
           const entity = annotationStore.selected;
           const areResultsEmpty = entity.results.length === 0;
           const isReview = self.hasInterface("review") || entity.canBeReviewed;
           const isUpdate = !isReview && isDefined(entity.pk);
           // no changes were made over previously submitted version — no drafts, no pending changes
           const noChanges = !entity.history.canUndo && !entity.draftId;
-          const isUpdateDisabled = isFF(FF_REVIEWER_FLOW) && isUpdate && noChanges;
+          const isUpdateDisabled =
+            isFF(FF_REVIEWER_FLOW) && isUpdate && noChanges;
 
           if (shouldDenyEmptyAnnotation && areResultsEmpty) return;
           if (annotationStore.viewingAll) return;
@@ -394,7 +422,9 @@ export default types
       hotkeys.addNamed("region:delete-all", () => {
         const { selected } = self.annotationStore;
 
-        if (window.confirm(getEnv(self).messages.CONFIRM_TO_DELETE_ALL_REGIONS)) {
+        if (
+          window.confirm(getEnv(self).messages.CONFIRM_TO_DELETE_ALL_REGIONS)
+        ) {
           selected.deleteAllRegions();
         }
       });
@@ -588,12 +618,15 @@ export default types
     }
 
     function incrementQueuePosition(number = 1) {
-      self.queuePosition = clamp(self.queuePosition + number, 1, self.queueTotal);
+      self.queuePosition = clamp(
+        self.queuePosition + number,
+        1,
+        self.queueTotal
+      );
     }
 
     function submitAnnotation() {
       if (self.isSubmitting) return;
-
       const entity = self.annotationStore.selected;
       const event = entity.exists ? "updateAnnotation" : "submitAnnotation";
 
@@ -607,7 +640,12 @@ export default types
       handleSubmittingFlag(async () => {
         if (isFF(FF_CUSTOM_SCRIPT)) {
           await self.waitForDraftSubmission();
-          const allowedToSave = await getEnv(self).events.invoke("beforeSaveAnnotation", self, entity, { event });
+          const allowedToSave = await getEnv(self).events.invoke(
+            "beforeSaveAnnotation",
+            self,
+            entity,
+            { event }
+          );
           if (allowedToSave && allowedToSave.some((x) => x === false)) return;
 
           entity.sendUserGenerate();
@@ -634,12 +672,22 @@ export default types
 
       handleSubmittingFlag(async () => {
         if (isFF(FF_CUSTOM_SCRIPT)) {
-          const allowedToSave = await getEnv(self).events.invoke("beforeSaveAnnotation", self, entity, {
-            event: "updateAnnotation",
-          });
+          const allowedToSave = await getEnv(self).events.invoke(
+            "beforeSaveAnnotation",
+            self,
+            entity,
+            {
+              event: "updateAnnotation",
+            }
+          );
           if (allowedToSave && allowedToSave.some((x) => x === false)) return;
         }
-        await getEnv(self).events.invoke("updateAnnotation", self, entity, extraData);
+        await getEnv(self).events.invoke(
+          "updateAnnotation",
+          self,
+          entity,
+          extraData
+        );
         self.incrementQueuePosition();
         if (isFF(FF_CUSTOM_SCRIPT)) {
           entity.dropDraft();
@@ -676,9 +724,14 @@ export default types
         entity.beforeSend();
         if (!entity.validate()) return;
         if (isFF(FF_CUSTOM_SCRIPT)) {
-          const allowedToSave = await getEnv(self).events.invoke("beforeSaveAnnotation", self, entity, {
-            event: "acceptAnnotation",
-          });
+          const allowedToSave = await getEnv(self).events.invoke(
+            "beforeSaveAnnotation",
+            self,
+            entity,
+            {
+              event: "acceptAnnotation",
+            }
+          );
           if (allowedToSave && allowedToSave.some((x) => x === false)) return;
         }
 
@@ -686,7 +739,10 @@ export default types
         const isDirty = entity.history.canUndo || entity.versions.draft;
 
         entity.dropDraft();
-        await getEnv(self).events.invoke("acceptAnnotation", self, { isDirty, entity });
+        await getEnv(self).events.invoke("acceptAnnotation", self, {
+          isDirty,
+          entity,
+        });
         self.incrementQueuePosition();
       }, "Error during accept, try again");
     }
@@ -700,16 +756,25 @@ export default types
         entity.beforeSend();
         if (!entity.validate()) return;
         if (isFF(FF_CUSTOM_SCRIPT)) {
-          const allowedToSave = await getEnv(self).events.invoke("beforeSaveAnnotation", self, entity, {
-            event: "rejectAnnotation",
-          });
+          const allowedToSave = await getEnv(self).events.invoke(
+            "beforeSaveAnnotation",
+            self,
+            entity,
+            {
+              event: "rejectAnnotation",
+            }
+          );
           if (allowedToSave && allowedToSave.some((x) => x === false)) return;
         }
 
         const isDirty = entity.history.canUndo;
 
         entity.dropDraft();
-        await getEnv(self).events.invoke("rejectAnnotation", self, { isDirty, entity, comment });
+        await getEnv(self).events.invoke("rejectAnnotation", self, {
+          isDirty,
+          entity,
+          comment,
+        });
         self.incrementQueuePosition(-1);
       }, "Error during reject, try again");
     }
@@ -727,7 +792,11 @@ export default types
 
         const isDirty = entity.history.canUndo;
 
-        await getEnv(self).events.invoke("customButton", self, buttonName, { isDirty, entity, button });
+        await getEnv(self).events.invoke("customButton", self, buttonName, {
+          isDirty,
+          entity,
+          button,
+        });
         self.incrementQueuePosition();
         entity.dropDraft();
       }, `Error during handling ${button} button, try again`);
@@ -785,7 +854,12 @@ export default types
      * Given annotations and predictions
      * `completions` is a fallback for old projects; they'll be saved as `annotations` anyway
      */
-    function initializeStore({ annotations = [], completions = [], predictions = [], annotationHistory }) {
+    function initializeStore({
+      annotations = [],
+      completions = [],
+      predictions = [],
+      annotationHistory,
+    }) {
       const as = self.annotationStore;
 
       // some hacks to properly clear react and mobx structures
@@ -850,7 +924,7 @@ export default types
             p.result.map((r) => ({
               ...r,
               origin: "prediction",
-            })),
+            }))
           );
         });
 
@@ -922,7 +996,9 @@ export default types
     });
 
     function addAnnotationToTaskHistory(annotationId) {
-      const taskIndex = self.taskHistory.findIndex(({ taskId }) => taskId === self.task.id);
+      const taskIndex = self.taskHistory.findIndex(
+        ({ taskId }) => taskId === self.task.id
+      );
 
       if (taskIndex >= 0) {
         self.taskHistory[taskIndex].annotationId = annotationId;
@@ -942,7 +1018,9 @@ export default types
     function nextTask() {
       if (self.canGoNextTask) {
         const { taskId, annotationId } =
-          self.taskHistory[self.taskHistory.findIndex((x) => x.taskId === self.task.id) + 1];
+          self.taskHistory[
+            self.taskHistory.findIndex((x) => x.taskId === self.task.id) + 1
+          ];
 
         getEnv(self).events.invoke("nextTask", taskId, annotationId);
         self.incrementQueuePosition();

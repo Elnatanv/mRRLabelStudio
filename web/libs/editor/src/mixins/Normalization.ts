@@ -10,12 +10,34 @@ import { types } from "mobx-state-tree";
 const NormalizationMixin = types
   .model({
     meta: types.frozen<{ text?: string[] }>({}),
+    brand: types.maybe(types.string), // store brand for the region
+    detectedColor: types.optional(
+      types.frozen<Record<string, { value: string; color: string }>>(),
+      {}
+    ),
+    bibId: types.maybe(types.string), // store bib id for the region
   })
   .actions((self) => ({
     /**
      * Set meta text
      * @param {*} text
      */
+    setDetectedColor(key: string, value: string, color: string) {
+      if (!self.detectedColor) {
+        self.detectedColor = {};
+      }
+      self.detectedColor = {
+        ...self.detectedColor,
+        [key]: { value, color },
+      };
+    },
+    setBrand(value: string) {
+      self.brand = value;
+    },
+    setBibId(bibId: string) {
+      self.bibId = bibId;
+    },
+
     setMetaText(text: string) {
       if (text) {
         self.meta = { ...self.meta, text: [text] };
@@ -27,6 +49,7 @@ const NormalizationMixin = types
       }
     },
   }))
+
   .actions((self) => ({
     /**
      * Delete meta text
@@ -35,5 +58,4 @@ const NormalizationMixin = types
       self.setMetaText("");
     },
   }));
-
 export default NormalizationMixin;

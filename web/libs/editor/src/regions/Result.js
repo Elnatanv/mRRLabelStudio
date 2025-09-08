@@ -6,6 +6,7 @@ import Tree from "../core/Tree";
 import { AnnotationMixin } from "../mixins/AnnotationMixin";
 import { isDefined } from "../utils/utilities";
 import { FF_LSDV_4583, isFF } from "../utils/feature-flags";
+import { getBasicColorName } from "../components/SidePanels/DetailsPanel/DetailsPanel";
 
 const resultTypes = [
   "labels",
@@ -44,7 +45,9 @@ const resultValues = {
   rating: types.maybe(types.number),
   item_index: types.maybeNull(types.number),
   text: types.maybe(types.union(types.string, types.array(types.string))),
-  choices: types.maybe(types.array(types.union(types.string, types.array(types.string)))),
+  choices: types.maybe(
+    types.array(types.union(types.string, types.array(types.string)))
+  ),
   // pairwise
   selected: types.maybe(types.enumeration(["left", "right"])),
   // @todo all other *labels
@@ -86,20 +89,37 @@ const Result = types
     // KonvaRegion, TextRegion, HyperTextRegion, AudioRegion)),
     // optional for classifications
     // labeling/control tag
-    from_name: types.late(() => types.reference(types.union(...Registry.modelsArr()))),
+    from_name: types.late(() =>
+      types.reference(types.union(...Registry.modelsArr()))
+    ),
     // object tag
-    to_name: types.late(() => types.reference(types.union(...Registry.objectTypes()))),
+    to_name: types.late(() =>
+      types.reference(types.union(...Registry.objectTypes()))
+    ),
+    detectedColor: types.optional(types.frozen(), {}),
+    brand: types.maybe(types.string),
+    bibId: types.maybe(types.string),
     // @todo some general type, maybe just a `string`
     type: ff.isActive(ff.FF_CUSTOM_TAGS)
-      ? types.late(() => types.enumeration([...resultTypes, ...Registry.customTags.map((t) => t.resultName)]))
+      ? types.late(() =>
+          types.enumeration([
+            ...resultTypes,
+            ...Registry.customTags.map((t) => t.resultName),
+          ])
+        )
       : types.enumeration([...resultTypes]),
     // @todo much better to have just a value, not a hash with empty fields
     value: ff.isActive(ff.FF_CUSTOM_TAGS)
       ? types.late(() =>
           types.model({
             ...resultValues,
-            ...Object.fromEntries(Registry.customTags.map((t) => [t.resultName, types.maybe(t.result)])),
-          }),
+            ...Object.fromEntries(
+              Registry.customTags.map((t) => [
+                t.resultName,
+                types.maybe(t.result),
+              ])
+            ),
+          })
         )
       : types.model({
           ...resultValues,
@@ -128,7 +148,9 @@ const Result = types
 
     mergeMainValue(value) {
       value = value?.toJSON ? value.toJSON() : value;
-      const mainValue = self.mainValue?.toJSON?.() ? self.mainValue?.toJSON?.() : self.mainValue;
+      const mainValue = self.mainValue?.toJSON?.()
+        ? self.mainValue?.toJSON?.()
+        : self.mainValue;
 
       if (typeof value !== typeof mainValue) return null;
       if (self.type.endsWith("labels")) {
@@ -168,7 +190,11 @@ const Result = types
       if (self.mainValue?.length === 0 && self.from_name.allowempty) {
         return self.from_name.findLabel(null);
       }
-      return self.mainValue?.map((value) => self.from_name.findLabel(value)).filter(Boolean) ?? [];
+      return (
+        self.mainValue
+          ?.map((value) => self.from_name.findLabel(value))
+          .filter(Boolean) ?? []
+      );
     },
 
     /**
@@ -202,12 +228,15 @@ const Result = types
       }
 
       // picks leaf's (last item in a path) value for Taxonomy or usual Choice value for Choices
-      const innerResults = (r) => r.map((s) => (Array.isArray(s) ? s.at(-1) : s));
+      const innerResults = (r) =>
+        r.map((s) => (Array.isArray(s) ? s.at(-1) : s));
 
       const isChoiceSelected = () => {
         const tagName = control.whentagname;
         const choiceValues = control.whenchoicevalue?.split(",") ?? null;
-        const results = self.annotation.results.filter((r) => ["choices", "taxonomy"].includes(r.type) && r !== self);
+        const results = self.annotation.results.filter(
+          (r) => ["choices", "taxonomy"].includes(r.type) && r !== self
+        );
 
         if (tagName) {
           const result = results.find((r) => {
@@ -220,7 +249,9 @@ const Result = types
           if (
             choiceValues &&
             !choiceValues.some((v) =>
-              innerResults(result.mainValue).some((vv) => result.from_name.selectedChoicesMatch(v, vv)),
+              innerResults(result.mainValue).some((vv) =>
+                result.from_name.selectedChoicesMatch(v, vv)
+              )
             )
           )
             return false;
@@ -230,7 +261,11 @@ const Result = types
           if (
             choiceValues &&
             !results.some((r) =>
-              choiceValues.some((v) => innerResults(r.mainValue).some((vv) => r.from_name.selectedChoicesMatch(v, vv))),
+              choiceValues.some((v) =>
+                innerResults(r.mainValue).some((vv) =>
+                  r.from_name.selectedChoicesMatch(v, vv)
+                )
+              )
             )
           )
             return false;
@@ -249,7 +284,10 @@ const Result = types
 
       // We need to check if there is any node up in the tree with visibility restrictions so we can determine
       // if the element is selected considering its own visibility
-      if (!control.perregion && findParentWithVisibleWhen(control, "choice-selected")) {
+      if (
+        !control.perregion &&
+        findParentWithVisibleWhen(control, "choice-selected")
+      ) {
         return control.isVisible === false ? false : isChoiceSelected();
       }
 
@@ -282,7 +320,8 @@ const Result = types
       const fillcolor = emptyLabel.background || emptyLabel.parent.fillcolor;
 
       if (!fillcolor) return null;
-      const strokecolor = emptyLabel.background || emptyLabel.parent.strokecolor;
+      const strokecolor =
+        emptyLabel.background || emptyLabel.parent.strokecolor;
       const { strokewidth, fillopacity, opacity } = emptyLabel.parent;
 
       return { strokecolor, strokewidth, fillcolor, fillopacity, opacity };
@@ -291,7 +330,8 @@ const Result = types
     get controlStyle() {
       if (!self.from_name) return null;
 
-      const { fillcolor, strokecolor, strokewidth, fillopacity, opacity } = self.from_name;
+      const { fillcolor, strokecolor, strokewidth, fillopacity, opacity } =
+        self.from_name;
 
       return { strokecolor, strokewidth, fillcolor, fillopacity, opacity };
     },
@@ -348,6 +388,10 @@ const Result = types
       const id = self.area?.cleanId;
       const from_name = Tree.cleanUpId(sn.from_name);
       const to_name = Tree.cleanUpId(sn.to_name);
+      const detectedColor = self.area.detectedColor;
+      const brand = self.area.brand;
+      const task = self.store.task;
+      const bibId = task.bibId;
 
       if (!data) return null;
       if (!self.canBeSubmitted) return null;
@@ -359,7 +403,11 @@ const Result = types
         if (type === "labels") return null;
         // add labels to the main result, not nested ones
         // if this is specialized labels, then labels will be already part of it, so skipping it
-        if (!type.endsWith("labels") && self.area?.labels?.length && !self.from_name.perregion) {
+        if (
+          !type.endsWith("labels") &&
+          self.area?.labels?.length &&
+          !self.from_name.perregion
+        ) {
           data.value.labels = self.area.labels;
         }
       }
@@ -374,7 +422,16 @@ const Result = types
         data.parentID = self.area.parentID.replace(/#.*/, "");
       }
 
-      Object.assign(data, { id, from_name, to_name, type, origin: self.area.origin });
+      Object.assign(data, {
+        id,
+        from_name,
+        to_name,
+        type,
+        detectedColor,
+        brand,
+        bibId,
+        origin: self.area.origin,
+      });
 
       if (isDefined(value[valueType])) {
         Object.assign(data.value, { [valueType]: value[valueType] });

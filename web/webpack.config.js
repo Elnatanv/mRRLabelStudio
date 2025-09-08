@@ -10,18 +10,30 @@ require("dotenv").config({
 });
 
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const { EnvironmentPlugin, DefinePlugin, ProgressPlugin, optimize } = require("webpack");
+const {
+  EnvironmentPlugin,
+  DefinePlugin,
+  ProgressPlugin,
+  optimize,
+} = require("webpack");
 const TerserPlugin = require("terser-webpack-plugin");
 const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 
 const RELEASE = require("./release").getReleaseName();
 
 const css_prefix = "lsf-";
-const mode = process.env.BUILD_MODULE ? "production" : process.env.NODE_ENV || "development";
+const mode = process.env.BUILD_MODULE
+  ? "production"
+  : process.env.NODE_ENV || "development";
 const isDevelopment = mode !== "production";
-const devtool = process.env.NODE_ENV === "production" ? "source-map" : "cheap-module-source-map";
+const devtool =
+  process.env.NODE_ENV === "production"
+    ? "source-map"
+    : "cheap-module-source-map";
 const FRONTEND_HMR = process.env.FRONTEND_HMR === "true";
-const FRONTEND_HOSTNAME = FRONTEND_HMR ? process.env.FRONTEND_HOSTNAME || "http://localhost:8010" : "";
+const FRONTEND_HOSTNAME = FRONTEND_HMR
+  ? process.env.FRONTEND_HOSTNAME || "http://localhost:8010"
+  : "";
 const DJANGO_HOSTNAME = process.env.DJANGO_HOSTNAME || "http://localhost:8080";
 const HMR_PORT = FRONTEND_HMR ? +new URL(FRONTEND_HOSTNAME).port : 8010;
 
@@ -56,7 +68,7 @@ const optimizer = () => {
       }),
       new CssMinimizerPlugin({
         parallel: true,
-      }),
+      })
     );
   }
 
@@ -98,8 +110,8 @@ module.exports = composePlugins(
           isDevelopment && FRONTEND_HOSTNAME
             ? `${FRONTEND_HOSTNAME}/react-app/`
             : process.env.MODE === "standalone-playground"
-              ? "/playground-assets/"
-              : "auto",
+            ? "/playground-assets/"
+            : "auto",
         scriptType: "text/javascript",
       };
 
@@ -151,7 +163,9 @@ module.exports = composePlugins(
       if (isScss) {
         rule.oneOf.forEach((loader) => {
           if (loader.use) {
-            const cssLoader = loader.use.find((use) => use.loader && use.loader.includes("css-loader"));
+            const cssLoader = loader.use.find(
+              (use) => use.loader && use.loader.includes("css-loader")
+            );
 
             if (cssLoader && cssLoader.options) {
               cssLoader.options.modules = {
@@ -177,15 +191,22 @@ module.exports = composePlugins(
           if (testString.match(/module|raw|antd/)) return false;
 
           // we only target pre-processors that has 'css-loader included'
-          return testString.match(/scss|sass/) && r.use.some((u) => u.loader && u.loader.includes("css-loader"));
+          return (
+            testString.match(/scss|sass/) &&
+            r.use.some((u) => u.loader && u.loader.includes("css-loader"))
+          );
         });
 
         r.forEach((_r) => {
-          const cssLoader = _r.use.find((use) => use.loader && use.loader.includes("css-loader"));
+          const cssLoader = _r.use.find(
+            (use) => use.loader && use.loader.includes("css-loader")
+          );
 
           if (!cssLoader) return;
 
-          const isSASS = _r.use.some((use) => use.loader && use.loader.match(/sass|scss/));
+          const isSASS = _r.use.some(
+            (use) => use.loader && use.loader.match(/sass|scss/)
+          );
 
           if (isSASS) _r.exclude = /node_modules/;
 
@@ -246,7 +267,7 @@ module.exports = composePlugins(
           },
           "postcss-loader",
         ],
-      },
+      }
     );
 
     if (isDevelopment) {
@@ -280,7 +301,10 @@ module.exports = composePlugins(
             // Allow cross-origin requests from Django
             headers: { "Access-Control-Allow-Origin": "*" },
             static: {
-              directory: path.resolve(__dirname, "../label_studio/core/static/"),
+              directory: path.resolve(
+                __dirname,
+                "../label_studio/core/static/"
+              ),
               publicPath: "/static/",
             },
             devMiddleware: {
@@ -304,5 +328,5 @@ module.exports = composePlugins(
             ],
           },
     });
-  },
+  }
 );

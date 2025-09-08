@@ -1,5 +1,15 @@
 import throttle from "lodash.throttle";
-import { destroy, detach, flow, getEnv, getParent, getRoot, isAlive, onSnapshot, types } from "mobx-state-tree";
+import {
+  destroy,
+  detach,
+  flow,
+  getEnv,
+  getParent,
+  getRoot,
+  isAlive,
+  onSnapshot,
+  types,
+} from "mobx-state-tree";
 import { ff } from "@humansignal/core";
 import { errorBuilder } from "../../core/DataValidator/ConfigValidator";
 import { guidGenerator } from "../../core/Helpers";
@@ -25,6 +35,7 @@ import RegionStore from "../RegionStore";
 import RelationStore from "../RelationStore";
 import { UserExtended } from "../UserStore";
 import { LinkingModes } from "./LinkingModes";
+import { INTERNAL_getBuildingBlocksRev1 } from "jotai/vanilla/internals";
 
 const hotkeys = Hotkey("Annotations", "Annotations");
 
@@ -112,7 +123,11 @@ const UserOrReference = types.union({
       return types.safeReference(UserExtended);
     }
     // If it's a full user object, store it as frozen to avoid duplicate instances
-    if (snapshot && typeof snapshot === "object" && (snapshot.firstName || snapshot.email || snapshot.username)) {
+    if (
+      snapshot &&
+      typeof snapshot === "object" &&
+      (snapshot.firstName || snapshot.email || snapshot.username)
+    ) {
       return types.frozen();
     }
     // Default to reference for any other case
@@ -131,6 +146,7 @@ const _Annotation = types
     // @todo but it calculates once, so all the annotations have the same pk
     // @todo why don't use only `id`?
     // @todo reverted back to wrong type; maybe it breaks all the deserialisation
+
     pk: types.maybeNull(types.string),
 
     selected: types.optional(types.boolean, false),
@@ -209,7 +225,11 @@ const _Annotation = types
 
       if (children) updatedItem = { ...updatedItem, children };
       if (imageEntities) updatedItem = { ...updatedItem, imageEntities };
-      if (updatedItem.id) updatedItem = { ...updatedItem, id: `${updatedItem.name ?? updatedItem.id}@${sn.id}` };
+      if (updatedItem.id)
+        updatedItem = {
+          ...updatedItem,
+          id: `${updatedItem.name ?? updatedItem.id}@${sn.id}`,
+        };
       // @todo fallback for tags with name as id:
       // if (item.name) item = { ...item, name: item.name + "@" + sn.id };
       // @todo soon no such tags should left
@@ -231,7 +251,9 @@ const _Annotation = types
     };
 
     const getCreatedAt = (snapshot) => {
-      return snapshot.draft_created_at ?? snapshot.created_at ?? snapshot.createdDate;
+      return (
+        snapshot.draft_created_at ?? snapshot.created_at ?? snapshot.createdDate
+      );
     };
 
     return {
@@ -261,7 +283,7 @@ const _Annotation = types
           get toNames() {
             return self.list.toNames;
           },
-        },
+        }
   )
   .views((self) => ({
     get store() {
@@ -288,7 +310,8 @@ const _Annotation = types
     get results() {
       const results = [];
 
-      if (isAlive(self)) self.areas.forEach((a) => a.results.forEach((r) => results.push(r)));
+      if (isAlive(self))
+        self.areas.forEach((a) => a.results.forEach((r) => results.push(r)));
       return results;
     },
 
@@ -339,7 +362,9 @@ const _Annotation = types
 
     // existing annotation which can be updated
     get exists() {
-      const dataExists = (self.userGenerate && self.sentUserGenerate) || isDefined(self.versions.result);
+      const dataExists =
+        (self.userGenerate && self.sentUserGenerate) ||
+        isDefined(self.versions.result);
       const pkExists = isDefined(self.pk);
 
       return dataExists && pkExists;
@@ -388,7 +413,7 @@ const _Annotation = types
           toNames: new Map(),
           ids: new Map(),
         }
-      : {},
+      : {}
   )
   .views((self) => ({
     // experiment to display review buttons in Quick View
@@ -542,7 +567,8 @@ const _Annotation = types
      * @param {boolean} tryToKeepStates don't unselect labels if such setting is enabled
      */
     unselectAll(tryToKeepStates = false) {
-      const keepStates = tryToKeepStates && self.store.settings.continuousLabeling;
+      const keepStates =
+        tryToKeepStates && self.store.settings.continuousLabeling;
 
       self.unselectAreas();
       if (!keepStates) self.unselectStates();
@@ -571,7 +597,8 @@ const _Annotation = types
         return;
       }
 
-      if (deleteReadOnly === false) regions = regions.filter((r) => r.readonly === false);
+      if (deleteReadOnly === false)
+        regions = regions.filter((r) => r.readonly === false);
 
       for (const r of regions) {
         r.deleteRegion();
@@ -635,7 +662,8 @@ const _Annotation = types
         }
       }
 
-      if (!region.classification) getEnv(self).events.invoke("entityDelete", region);
+      if (!region.classification)
+        getEnv(self).events.invoke("entityDelete", region);
 
       self.relationStore.deleteNodeRelation(region);
 
@@ -661,7 +689,8 @@ const _Annotation = types
         let stopDrawingAfterNextUndo = false;
         const selectedIds = regionStore.selectedIds;
         const currentRegion = regionStore.findRegion(
-          selectedIds[selectedIds.length - 1] ?? regionStore.regions[regionStore.regions.length - 1]?.id,
+          selectedIds[selectedIds.length - 1] ??
+            regionStore.regions[regionStore.regions.length - 1]?.id
         );
 
         if (currentRegion?.type === "polygonregion") {
@@ -707,7 +736,8 @@ const _Annotation = types
       const filtered = areas.filter((area) => area.isDrawing);
 
       // Update UI to reflect the state of an unfinished region in case if it exists
-      if (filtered.length) self.regionStore.selection._updateResultsFromRegions(filtered);
+      if (filtered.length)
+        self.regionStore.selection._updateResultsFromRegions(filtered);
     },
     updateAppearenceFromState() {
       self.areas.forEach((area) => area.updateAppearenceFromState?.());
@@ -718,7 +748,9 @@ const _Annotation = types
       self.names.forEach((tag) => {
         if (tag.type.endsWith("labels")) {
           // @todo check for choice="multiple" and multiple preselected labels
-          const preselected = tag.children?.find((label) => label.initiallySelected);
+          const preselected = tag.children?.find(
+            (label) => label.initiallySelected
+          );
 
           if (preselected) preselected.setSelected(true);
         }
@@ -729,9 +761,17 @@ const _Annotation = types
 
     setDefaultValues() {
       self.names.forEach((tag) => {
-        if (["choices", "taxonomy"].includes(tag?.type) && tag.preselectedValues?.length) {
+        if (
+          ["choices", "taxonomy"].includes(tag?.type) &&
+          tag.preselectedValues?.length
+        ) {
           // <Choice selected="true"/>
-          self.createResult({}, { [tag?.type]: tag.preselectedValues }, tag, tag.toname);
+          self.createResult(
+            {},
+            { [tag?.type]: tag.preselectedValues },
+            tag,
+            tag.toname
+          );
         }
       });
     },
@@ -792,7 +832,7 @@ const _Annotation = types
           self.saveDraft();
         },
         self.autosaveDelay,
-        { leading: false },
+        { leading: false }
       );
 
       onSnapshot(self.areas, self.autosave);
@@ -924,19 +964,33 @@ const _Annotation = types
       // Hotkeys setup
       self.traverseTree((node) => {
         if (node && node.onHotKey && node.hotkey) {
-          hotkeys.addKey(node.hotkey, node.onHotKey, undefined, node.hotkeyScope);
+          hotkeys.addKey(
+            node.hotkey,
+            node.onHotKey,
+            undefined,
+            node.hotkeyScope
+          );
         }
       });
 
       self.traverseTree((node) => {
         // add Space hotkey for playbacks of audio, there might be
         // multiple audios on the screen
-        if (node && !node.hotkey && (node.type === "audio" || node.type === "audioplus")) {
+        if (
+          node &&
+          !node.hotkey &&
+          (node.type === "audio" || node.type === "audioplus")
+        ) {
           if (audiosNum > 0) comb = `${mod}+${audiosNum + 1}`;
           else audioNode = node;
 
           node.hotkey = comb;
-          hotkeys.addKey(comb, node.onHotKey, "Play an audio", Hotkey.ALL_SCOPES);
+          hotkeys.addKey(
+            comb,
+            node.onHotKey,
+            "Play an audio",
+            Hotkey.ALL_SCOPES
+          );
 
           audiosNum++;
         }
@@ -976,7 +1030,14 @@ const _Annotation = types
       Hotkey.setScope(Hotkey.DEFAULT_SCOPE);
     },
 
-    createResult(areaValue, resultValue, control, object, skipAfrerCreate = false, additionalStates = []) {
+    createResult(
+      areaValue,
+      resultValue,
+      control,
+      object,
+      skipAfrerCreate = false,
+      additionalStates = []
+    ) {
       // Without correct validation object may be null, but it it shouldn't be so in results - so we should find any
       if (!object && control.type === "textarea") {
         object = self.objects[0];
@@ -1022,7 +1083,8 @@ const _Annotation = types
       // but are dependent on the whole region list values
       self.updateAppearenceFromState();
 
-      if (!area.classification) getEnv(self).events.invoke("entityCreate", area);
+      if (!area.classification)
+        getEnv(self).events.invoke("entityCreate", area);
       if (!skipAfrerCreate) self.afterCreateResult(area, control);
 
       return area;
@@ -1066,6 +1128,7 @@ const _Annotation = types
       // return self.serialized;
 
       document.body.style.cursor = "wait";
+      const task = self.store.task;
 
       const result = self.results
         .map((r) => r.serialize(options))
@@ -1073,6 +1136,8 @@ const _Annotation = types
         .concat(self.relationStore.serialize(options));
 
       document.body.style.cursor = "default";
+      console.log("---", result, task, task.bibId);
+      //TODO:: store the info to db
 
       return result;
     },
@@ -1091,7 +1156,8 @@ const _Annotation = types
         }
 
         if (obj.type === "htmllabels") obj.type = "hypertextlabels";
-        if (obj.normalization) obj.meta = { ...obj.meta, text: [obj.normalization] };
+        if (obj.normalization)
+          obj.meta = { ...obj.meta, text: [obj.normalization] };
         const tagNames = self.names;
 
         // Clear non-existent labels
@@ -1103,7 +1169,11 @@ const _Annotation = types
               // detect most relevant label tags if that one from from_name is missing
               // can be useful for predictions in old format with config in new format:
               // Rectangle + Labels -> RectangleLabels
-              if (!tagNames.has(obj.from_name) || (!obj.value[key].length && !tagNames.get(obj.from_name).allowempty)) {
+              if (
+                !tagNames.has(obj.from_name) ||
+                (!obj.value[key].length &&
+                  !tagNames.get(obj.from_name).allowempty)
+              ) {
                 delete obj.value[key];
                 if (tagNames.has(obj.to_name)) {
                   // Redirect references to existent tool
@@ -1112,12 +1182,21 @@ const _Annotation = types
                   const states = self.toNames.get(targetObject.name);
 
                   if (states?.length) {
-                    const altToolsControllerType = obj.type.replace(/labels$/, "");
+                    const altToolsControllerType = obj.type.replace(
+                      /labels$/,
+                      ""
+                    );
                     const sameLabelsType = obj.type;
                     const simpleLabelsType = "labels";
 
-                    for (const altType of [altToolsControllerType, sameLabelsType, simpleLabelsType]) {
-                      const state = states.find((state) => state.type === altType);
+                    for (const altType of [
+                      altToolsControllerType,
+                      sameLabelsType,
+                      simpleLabelsType,
+                    ]) {
+                      const state = states.find(
+                        (state) => state.type === altType
+                      );
 
                       if (state) {
                         obj.type = altType;
@@ -1211,9 +1290,12 @@ const _Annotation = types
 
         if (a.classification) {
           if (classificationAreasByControlName[controlName]?.[itemIndex]) {
-            duplicateAreaIds.push(classificationAreasByControlName[controlName][itemIndex]);
+            duplicateAreaIds.push(
+              classificationAreasByControlName[controlName][itemIndex]
+            );
           }
-          classificationAreasByControlName[controlName] = classificationAreasByControlName[controlName] || {};
+          classificationAreasByControlName[controlName] =
+            classificationAreasByControlName[controlName] || {};
           classificationAreasByControlName[controlName][itemIndex] = a.id;
         }
       });
@@ -1240,7 +1322,7 @@ const _Annotation = types
           self.deserializeSingleResult(
             obj,
             (id) => areas.get(id),
-            (snapshot) => areas.put(snapshot),
+            (snapshot) => areas.put(snapshot)
           );
         }
 
@@ -1261,7 +1343,7 @@ const _Annotation = types
               `${obj.from_id}#${self.id}`,
               `${obj.to_id}#${self.id}`,
               obj.direction,
-              obj.labels,
+              obj.labels
             );
           }
         }
@@ -1272,7 +1354,9 @@ const _Annotation = types
     },
 
     deserializeAnnotation(...args) {
-      console.warn("deserializeAnnotation() is deprecated. Use deserializeResults() instead");
+      console.warn(
+        "deserializeAnnotation() is deprecated. Use deserializeResults() instead"
+      );
       return self.deserializeResults(...args);
     },
 
@@ -1333,7 +1417,14 @@ const _Annotation = types
           }
         }
 
-        const newResult = { ...data, id: resultId, type, value, from_name, to_name };
+        const newResult = {
+          ...data,
+          id: resultId,
+          type,
+          value,
+          from_name,
+          to_name,
+        };
 
         area.addResult(newResult);
         // apply additional data, that were skipped in favour of region type detection
@@ -1341,14 +1432,24 @@ const _Annotation = types
 
         // if there is merged result with region data and type and also with the labels
         // and object allows such merge — create new result with these labels
-        if (!type.endsWith("labels") && value.labels && object.mergeLabelsAndResults) {
+        if (
+          !type.endsWith("labels") &&
+          value.labels &&
+          object.mergeLabelsAndResults
+        ) {
           const labels = value.labels;
-          const controls = self.toNames.get(object.name).filter((s) => s.type.endsWith("labels"));
-          const labelControl = controls.find((control) => control?.findLabel(labels[0]));
+          const controls = self.toNames
+            .get(object.name)
+            .filter((s) => s.type.endsWith("labels"));
+          const labelControl = controls.find((control) =>
+            control?.findLabel(labels[0])
+          );
 
           if (labelControl) {
             area.setValue(labelControl);
-            area.results.find((r) => r.type.endsWith("labels"))?.setValue(labels);
+            area.results
+              .find((r) => r.type.endsWith("labels"))
+              ?.setValue(labels);
           }
         }
       }
@@ -1360,7 +1461,8 @@ const _Annotation = types
         case "hypertext":
         case "richtext": {
           const hasStartEnd = isDefined(value.start) && isDefined(value.end);
-          const lacksOffsets = !isDefined(value.startOffset) && !isDefined(value.endOffset);
+          const lacksOffsets =
+            !isDefined(value.startOffset) && !isDefined(value.endOffset);
 
           // @todo move this Text regions offsets transform to RichTextRegion
           if (hasStartEnd && lacksOffsets) {
@@ -1468,4 +1570,8 @@ const _Annotation = types
     },
   }));
 
-export const Annotation = types.compose("Annotation", LinkingModes, _Annotation);
+export const Annotation = types.compose(
+  "Annotation",
+  LinkingModes,
+  _Annotation
+);

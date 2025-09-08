@@ -1,7 +1,11 @@
 import { destroy, getEnv, getParent, getRoot, types } from "mobx-state-tree";
 
 import { errorBuilder } from "../../core/DataValidator/ConfigValidator";
-import { DataValidator, ValidationError, VALIDATORS } from "../../core/DataValidator";
+import {
+  DataValidator,
+  ValidationError,
+  VALIDATORS,
+} from "../../core/DataValidator";
 import { guidGenerator } from "../../core/Helpers";
 import Registry from "../../core/Registry";
 import Tree from "../../core/Tree";
@@ -9,7 +13,12 @@ import Types from "../../core/Types";
 import { StoreExtender } from "../../mixins/SharedChoiceStore/extender";
 import { ViewModel } from "../../tags/visual";
 import Utils from "../../utils";
-import { FF_DEV_3034, FF_DEV_3391, FF_SIMPLE_INIT, isFF } from "../../utils/feature-flags";
+import {
+  FF_DEV_3034,
+  FF_DEV_3391,
+  FF_SIMPLE_INIT,
+  isFF,
+} from "../../utils/feature-flags";
 import { emailFromCreatedBy } from "../../utils/utilities";
 import { Annotation } from "./Annotation";
 import { HistoryItem } from "./HistoryItem";
@@ -90,7 +99,10 @@ const AnnotationStoreModel = types
           a.editable = false;
         });
       } else {
-        selectAnnotation(self.annotations.at(isFF(FF_SIMPLE_INIT) ? -1 : 0).id, { fromViewAll: true });
+        selectAnnotation(
+          self.annotations.at(isFF(FF_SIMPLE_INIT) ? -1 : 0).id,
+          { fromViewAll: true }
+        );
       }
     }
 
@@ -155,7 +167,12 @@ const AnnotationStoreModel = types
       c.editable = true;
       c.setupHotKeys();
 
-      getEnv(self).events.invoke("selectAnnotation", c, selected, options ?? {});
+      getEnv(self).events.invoke(
+        "selectAnnotation",
+        c,
+        selected,
+        options ?? {}
+      );
       if (c.pk) getParent(self).addAnnotationToTaskHistory(c.pk);
       return c;
     }
@@ -169,7 +186,10 @@ const AnnotationStoreModel = types
     function clearDeletedParents(annotation) {
       if (!annotation?.pk) return;
       self.annotations.forEach((anno) => {
-        if (anno.parent_annotation && +anno.parent_annotation === +annotation.pk) {
+        if (
+          anno.parent_annotation &&
+          +anno.parent_annotation === +annotation.pk
+        ) {
           anno.parent_annotation = null;
         }
       });
@@ -239,7 +259,9 @@ const AnnotationStoreModel = types
       }
       const modelClass = Registry.getModelByTag(rootModel.type);
       // hacky way to get all the available object tag names
-      const objectTypes = Registry.objectTypes().map((type) => type.name.replace("Model", "").toLowerCase());
+      const objectTypes = Registry.objectTypes().map((type) =>
+        type.name.replace("Model", "").toLowerCase()
+      );
       const objects = [];
 
       self.validate(VALIDATORS.CONFIG, rootModel);
@@ -369,7 +391,8 @@ const AnnotationStoreModel = types
           // drafts can be created by other user, but we don't have much info
           // so parse "id", get email and find user by it
           const email = emailFromCreatedBy(item.createdBy);
-          const user = email && self.store.users.find((user) => user.email === email);
+          const user =
+            email && self.store.users.find((user) => user.email === email);
 
           if (user) actual_user = user.id;
         }
@@ -463,7 +486,12 @@ const AnnotationStoreModel = types
           .forEach((r) => r.from_name.updateFromResult?.(r.mainValue));
       });
 
-      getEnv(self).events.invoke("selectHistory", self.store, self.selected, self.selectedHistory);
+      getEnv(self).events.invoke(
+        "selectHistory",
+        self.store,
+        self.selected,
+        self.selectedHistory
+      );
     }
 
     function addAnnotationFromPrediction(entity) {
@@ -516,16 +544,19 @@ const AnnotationStoreModel = types
     const addErrors = (errors) => {
       const ids = [];
 
-      const newErrors = [...(self.validation ?? []), ...errors].reduce((res, error) => {
-        const id = error.identifier;
+      const newErrors = [...(self.validation ?? []), ...errors].reduce(
+        (res, error) => {
+          const id = error.identifier;
 
-        if (ids.indexOf(id) < 0) {
-          ids.push(id);
-          res.push(error);
-        }
+          if (ids.indexOf(id) < 0) {
+            ids.push(id);
+            res.push(error);
+          }
 
-        return res;
-      }, []);
+          return res;
+        },
+        []
+      );
 
       self.validation = newErrors;
     };
@@ -585,4 +616,8 @@ const AnnotationStoreModel = types
     };
   });
 
-export default types.compose("AnnotationStore", AnnotationStoreModel, StoreExtender);
+export default types.compose(
+  "AnnotationStore",
+  AnnotationStoreModel,
+  StoreExtender
+);

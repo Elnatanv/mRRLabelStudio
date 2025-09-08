@@ -29,7 +29,7 @@ export const CommentForm: FC<CommentFormProps> = observer(
         if (!formRef.current || commentStore.loading === "addComment") return;
 
         const comment = new FormData(formRef.current).get("comment") as string;
-
+        
         if (!comment.trim()) return;
 
         try {
