@@ -17,7 +17,7 @@ const createGrid = (width, height, nodeSize) => {
         x: col * nodeSize,
         y: row * nodeSize,
         fill: "#fff",
-      })),
+      }))
     )
     .reduce((p, c) => [...p, ...c]);
 };
@@ -30,7 +30,7 @@ export default observer(
       const grid = createGrid(
         Math.ceil(item.stageWidth / item.gridsize),
         Math.ceil(item.stageHeight / item.gridsize),
-        item.gridsize,
+        item.gridsize
       );
 
       return (
@@ -49,5 +49,5 @@ export default observer(
         </Layer>
       );
     }
-  },
+  }
 );

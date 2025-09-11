@@ -1,5 +1,23 @@
-import { Component, createRef, forwardRef, Fragment, memo, useEffect, useMemo, useRef, useState } from "react";
-import { Group, Layer, Line, Rect, Stage, Image as KonvaImage, Circle } from "react-konva";
+import React, {
+  Component,
+  createRef,
+  forwardRef,
+  Fragment,
+  memo,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  Group,
+  Layer,
+  Line,
+  Rect,
+  Stage,
+  Image as KonvaImage,
+  Circle,
+} from "react-konva";
 import { observer } from "mobx-react";
 import { getEnv, getRoot, isAlive } from "mobx-state-tree";
 
@@ -73,20 +91,31 @@ const Region = memo(({ region, showSelected = false }) => {
   return useObserver(() => Tree.renderItem(region, region.annotation, true));
 });
 
-const RegionsLayer = memo(({ regions, name, useLayers, showSelected = false, smoothing = true }) => {
-  const content = regions.map((el) => <Region key={`region-${el.id}`} region={el} showSelected={showSelected} />);
+const RegionsLayer = memo(
+  ({ regions, name, useLayers, showSelected = false, smoothing = true }) => {
+    const content = regions.map((el) => (
+      <Region key={`region-${el.id}`} region={el} showSelected={showSelected} />
+    ));
 
-  return useLayers === false ? (
-    content
-  ) : (
-    <Layer name={name} imageSmoothingEnabled={smoothing}>
-      {content}
-    </Layer>
-  );
-});
+    return useLayers === false ? (
+      content
+    ) : (
+      <Layer name={name} imageSmoothingEnabled={smoothing}>
+        {content}
+      </Layer>
+    );
+  }
+);
 
 const Regions = memo(
-  ({ regions, useLayers = true, chunkSize = 15, suggestion = false, showSelected = false, smoothing = true }) => {
+  ({
+    regions,
+    useLayers = true,
+    chunkSize = 15,
+    suggestion = false,
+    showSelected = false,
+    smoothing = true,
+  }) => {
     return (
       <ImageViewProvider value={{ suggestion }}>
         {(chunkSize ? chunks(regions, chunkSize) : regions).map((chunk, i) => (
@@ -101,21 +130,26 @@ const Regions = memo(
         ))}
       </ImageViewProvider>
     );
-  },
+  }
 );
 
 const DrawingRegion = observer(({ item }) => {
   const { drawingRegion } = item;
 
   if (!drawingRegion) return null;
-  if (item.multiImage && item.currentImage !== drawingRegion.item_index) return null;
+  if (item.multiImage && item.currentImage !== drawingRegion.item_index)
+    return null;
 
   const isBrush = drawingRegion.type === "brushregion";
   const Wrapper = drawingRegion && isBrush ? Fragment : Layer;
 
   return (
     <Wrapper imageSmoothingEnabled={item.smoothing}>
-      {drawingRegion ? <Region key={"drawing"} region={drawingRegion} /> : drawingRegion}
+      {drawingRegion ? (
+        <Region key={"drawing"} region={drawingRegion} />
+      ) : (
+        drawingRegion
+      )}
     </Wrapper>
   );
 });
@@ -211,7 +245,12 @@ const SelectionRect = observer(({ item }) => {
 
   return (
     <>
-      <Rect {...positionProps} stroke={SELECTION_COLOR} dash={SELECTION_DASH} strokeScaleEnabled={false} />
+      <Rect
+        {...positionProps}
+        stroke={SELECTION_COLOR}
+        dash={SELECTION_DASH}
+        strokeScaleEnabled={false}
+      />
       <Rect
         {...positionProps}
         stroke={SELECTION_SECOND_COLOR}
@@ -242,11 +281,13 @@ const TransformerBack = observer(({ item }) => {
           }}
           onMouseOver={(ev) => {
             if (!item.annotation.isLinkingMode) {
-              ev.target.getStage().container().style.cursor = Constants.POINTER_CURSOR;
+              ev.target.getStage().container().style.cursor =
+                Constants.POINTER_CURSOR;
             }
           }}
           onMouseOut={(ev) => {
-            ev.target.getStage().container().style.cursor = Constants.DEFAULT_CURSOR;
+            ev.target.getStage().container().style.cursor =
+              Constants.DEFAULT_CURSOR;
           }}
           onDragStart={(e) => {
             dragStartPointRef.current = {
@@ -291,17 +332,31 @@ const TransformerBack = observer(({ item }) => {
 
 const SelectedRegions = observer(({ item, selectedRegions }) => {
   if (!selectedRegions) return null;
-  const { brushRegions = [], shapeRegions = [] } = splitRegions(selectedRegions);
+  const { brushRegions = [], shapeRegions = [] } =
+    splitRegions(selectedRegions);
 
   return (
     <>
       {isFF(FF_LSDV_4930) ? null : <TransformerBack item={item} />}
       {brushRegions.length > 0 && (
-        <Regions key="brushes" name="brushes" regions={brushRegions} useLayers={false} showSelected chankSize={0} />
+        <Regions
+          key="brushes"
+          name="brushes"
+          regions={brushRegions}
+          useLayers={false}
+          showSelected
+          chankSize={0}
+        />
       )}
 
       {shapeRegions.length > 0 && (
-        <Regions key="shapes" name="shapes" regions={shapeRegions} showSelected chankSize={0} />
+        <Regions
+          key="shapes"
+          name="shapes"
+          regions={shapeRegions}
+          showSelected
+          chankSize={0}
+        />
       )}
     </>
   );
@@ -311,7 +366,8 @@ const SelectionLayer = observer(({ item, selectionArea }) => {
   const scale = isFF(FF_DEV_3793) ? 1 : 1 / (item.zoomScale || 1);
   const [isMouseWheelClick, setIsMouseWheelClick] = useState(false);
   const [shift, setShift] = useState(false);
-  const isPanTool = item.getToolsManager().findSelectedTool()?.fullName === "ZoomPanTool";
+  const isPanTool =
+    item.getToolsManager().findSelectedTool()?.fullName === "ZoomPanTool";
 
   const dragHandler = (e) => setIsMouseWheelClick(e.buttons === 4);
 
@@ -330,7 +386,8 @@ const SelectionLayer = observer(({ item, selectionArea }) => {
     };
   }, []);
 
-  const disableTransform = item.zoomScale > 1 && (shift || isPanTool || isMouseWheelClick);
+  const disableTransform =
+    item.zoomScale > 1 && (shift || isPanTool || isMouseWheelClick);
 
   let supportsTransform = true;
   let supportsRotate = true;
@@ -345,7 +402,8 @@ const SelectionLayer = observer(({ item, selectionArea }) => {
   supportsTransform =
     supportsTransform &&
     (item.selectedRegions.length > 1 ||
-      ((item.useTransformer || item.selectedShape?.preferTransformer) && item.selectedShape?.useTransformer));
+      ((item.useTransformer || item.selectedShape?.preferTransformer) &&
+        item.selectedShape?.useTransformer));
 
   return (
     <Layer scaleX={scale} scaleY={scale}>
@@ -361,7 +419,9 @@ const SelectionLayer = observer(({ item, selectionArea }) => {
         supportsScale={supportsScale}
         selectedShapes={item.selectedRegions}
         singleNodeMode={item.selectedRegions.length === 1}
-        useSingleNodeRotation={item.selectedRegions.length === 1 && supportsRotate}
+        useSingleNodeRotation={
+          item.selectedRegions.length === 1 && supportsRotate
+        }
         draggableBackgroundSelector={`#${TRANSFORMER_BACK_ID}`}
       />
     </Layer>
@@ -453,7 +513,7 @@ const Crosshair = memo(
         </Group>
       </Layer>
     );
-  }),
+  })
 );
 
 const PixelGridLayer = observer(({ item }) => {
@@ -462,7 +522,8 @@ const PixelGridLayer = observer(({ item }) => {
   const visible = item.zoomScale > ZOOM_THRESHOLD;
   const { naturalWidth, naturalHeight } = item.currentImageEntity ?? {};
   const { stageWidth, stageHeight } = item;
-  const imageSmallerThanStage = naturalWidth < stageWidth || naturalHeight < stageHeight;
+  const imageSmallerThanStage =
+    naturalWidth < stageWidth || naturalHeight < stageHeight;
 
   const step = item.stageZoom; // image pixel
 
@@ -548,7 +609,8 @@ export default observer(
     constructor(props) {
       super(props);
 
-      if (typeof props.item.smoothing === "boolean") props.store.settings.setSmoothing(props.item.smoothing);
+      if (typeof props.item.smoothing === "boolean")
+        props.store.settings.setSmoothing(props.item.smoothing);
     }
 
     handleOnClick = (e) => {
@@ -584,9 +646,11 @@ export default observer(
       // shape we can click on. Here we're relying on cursor position and non-transparent pixels
       // of the mask to detect cursor-region collision.
       if (ff.isActive(FF_BITMASK)) {
-        const hasSelected = item.selectedRegions.some((r) => r.type === "bitmaskregion");
+        const hasSelected = item.selectedRegions.some(
+          (r) => r.type === "bitmaskregion"
+        );
         const isBitmask = ["BitmaskTool", "BitmaskEraserTool"].includes(
-          item.getToolsManager().findSelectedTool().toolName,
+          item.getToolsManager().findSelectedTool().toolName
         );
 
         // We want to avoid weird behavior here with drawing while selecting another region
@@ -612,14 +676,20 @@ export default observer(
 
     resetDeferredClickTimeout = () => {
       if (this.deferredClickTimeout.length > 0) {
-        this.deferredClickTimeout = this.deferredClickTimeout.filter((timeout) => {
-          clearTimeout(timeout);
-          return false;
-        });
+        this.deferredClickTimeout = this.deferredClickTimeout.filter(
+          (timeout) => {
+            clearTimeout(timeout);
+            return false;
+          }
+        );
       }
     };
 
-    handleDeferredClick = (handleDeferredMouseDownCallback, handleDeselection, eligibleToDeselect = false) => {
+    handleDeferredClick = (
+      handleDeferredMouseDownCallback,
+      handleDeselection,
+      eligibleToDeselect = false
+    ) => {
       this.handleDeferredMouseDown = (wasClicked) => {
         if (wasClicked && eligibleToDeselect) {
           handleDeselection();
@@ -634,17 +704,22 @@ export default observer(
           () => {
             this.handleDeferredMouseDown?.(false);
           },
-          this.props.item.annotation.isDrawing ? 0 : 100,
-        ),
+          this.props.item.annotation.isDrawing ? 0 : 100
+        )
       );
     };
 
     handleMouseDown = (e) => {
       const { item } = this.props;
-      const isPanTool = item.getToolsManager().findSelectedTool()?.fullName === "ZoomPanTool";
-      const isMoveTool = item.getToolsManager().findSelectedTool()?.fullName === "MoveTool";
+      const isPanTool =
+        item.getToolsManager().findSelectedTool()?.fullName === "ZoomPanTool";
+      const isMoveTool =
+        item.getToolsManager().findSelectedTool()?.fullName === "MoveTool";
 
-      this.skipNextMouseDown = this.skipNextMouseUp = this.skipNextClick = false;
+      this.skipNextMouseDown =
+        this.skipNextMouseUp =
+        this.skipNextClick =
+          false;
       if (isFF(FF_LSDV_4930)) {
         this.mouseDownPoint = { x: e.evt.offsetX, y: e.evt.offsetY };
       }
@@ -665,7 +740,11 @@ export default observer(
         const isRightElementToCatchToolInteractions = (el) => {
           // Bitmask is like Brush, so treat it the same
           // The only difference is that Bitmask doesn't have a group inside
-          if (el.nodeType === "Layer" && !isMoveTool && el.attrs?.name === "bitmask") {
+          if (
+            el.nodeType === "Layer" &&
+            !isMoveTool &&
+            el.attrs?.name === "bitmask"
+          ) {
             return true;
           }
 
@@ -723,8 +802,10 @@ export default observer(
 
       if (isFF(FF_DEV_1442) && eligibleToolForDeselect) {
         const targetIsCanvas = e.target === item.stageRef;
-        const annotationHasSelectedRegions = item.annotation.selectedRegions.length > 0;
-        const eligibleToDeselect = targetIsCanvas && annotationHasSelectedRegions;
+        const annotationHasSelectedRegions =
+          item.annotation.selectedRegions.length > 0;
+        const eligibleToDeselect =
+          targetIsCanvas && annotationHasSelectedRegions;
 
         const handleDeselection = () => {
           item.annotation.unselectAll();
@@ -733,7 +814,11 @@ export default observer(
           this.skipNextClick = true;
         };
 
-        this.handleDeferredClick(handleMouseDown, handleDeselection, eligibleToDeselect);
+        this.handleDeferredClick(
+          handleMouseDown,
+          handleDeselection,
+          eligibleToDeselect
+        );
         return;
       }
 
@@ -855,7 +940,9 @@ export default observer(
     updateCrosshair = (e) => {
       if (this.crosshairRef.current) {
         const { x, y } = e.currentTarget.getPointerPosition();
-        this.crosshairRef.current.updatePointer(...this.props.item.fixZoomedCoords([x, y]));
+        this.crosshairRef.current.updatePointer(
+          ...this.props.item.fixZoomedCoords([x, y])
+        );
       }
     };
 
@@ -894,13 +981,19 @@ export default observer(
         const stage = item.stageRef;
 
         // Unified smooth zoom behavior for both trackpad and mouse wheel
-        item.handleZoom(e.evt.deltaY, stage.getPointerPosition(), e.evt.ctrlKey);
+        item.handleZoom(
+          e.evt.deltaY,
+          stage.getPointerPosition(),
+          e.evt.ctrlKey
+        );
       } else if (e.evt) {
         // Two fingers scroll (panning) - only when zoomed in
         const { item } = this.props;
 
-        const maxScrollX = Math.round(item.stageWidth * item.zoomScale) - item.stageWidth;
-        const maxScrollY = Math.round(item.stageHeight * item.zoomScale) - item.stageHeight;
+        const maxScrollX =
+          Math.round(item.stageWidth * item.zoomScale) - item.stageWidth;
+        const maxScrollY =
+          Math.round(item.stageHeight * item.zoomScale) - item.stageHeight;
 
         const newPos = {
           x: Math.min(0, Math.ceil(item.zoomingPositionX - e.evt.deltaX)),
@@ -908,8 +1001,10 @@ export default observer(
         };
 
         // Calculate scroll boundaries to allow scrolling the page when reaching stage edges
-        const withinX = newPos.x !== 0 && newPos.x > -maxScrollX && item.zoomScale !== 1;
-        const withinY = newPos.y !== 0 && newPos.y > -maxScrollY && item.zoomScale !== 1;
+        const withinX =
+          newPos.x !== 0 && newPos.x > -maxScrollX && item.zoomScale !== 1;
+        const withinY =
+          newPos.y !== 0 && newPos.y > -maxScrollY && item.zoomScale !== 1;
 
         // Detect scroll direction
         const scrollingX = Math.abs(e.evt.deltaX) > Math.abs(e.evt.deltaY);
@@ -964,7 +1059,11 @@ export default observer(
         const { offsetWidth, offsetHeight } = this.props.item.containerRef;
 
         if (this.props.item.naturalWidth <= 1) return;
-        if (this.lastOffsetWidth === offsetWidth && this.lastOffsetHeight === offsetHeight) return;
+        if (
+          this.lastOffsetWidth === offsetWidth &&
+          this.lastOffsetHeight === offsetHeight
+        )
+          return;
 
         this.props.item.onResize(offsetWidth, offsetHeight, true);
         this.lastOffsetWidth = offsetWidth;
@@ -973,13 +1072,34 @@ export default observer(
     }, 16);
 
     componentDidMount() {
-      const { item } = this.props;
+      const { item, store } = this.props;
 
       window.addEventListener("resize", this.onResize);
       this.attachObserver(item.containerRef);
       this.updateReadyStatus();
 
       hotkeys.addDescription("shift", "Pan image");
+
+      const imgUrl = JSON.parse(store.task.data);
+      const bibId = imgUrl.image.split("-")[1].split("_")[0];
+      const eventId = imgUrl.image.split("-")[1].split("_")[1];
+      // Athlete clothings data fetch
+      const apiUrl =
+        "https://api.myracereel.com/api/athletes/:bib/:eventId/getAthleteClothings";
+
+      const url = apiUrl.replace(":bib", bibId).replace(":eventId", eventId);
+
+      // Uncomment to fetch data
+      fetch(url)
+        .then((response) => response.json())
+        .then((data) => {
+          this.setState({ athleteClothingsData: data?.data?.clothings || [] });
+          this.athleteClothingsData = data?.data?.clothings || [];
+          console.log("Fetched athlete clothings data:", data);
+        })
+        .catch((error) =>
+          console.error("Error fetching athlete clothings data:", error)
+        );
     }
 
     attachObserver = (node) => {
@@ -1015,7 +1135,8 @@ export default observer(
       const { imageRef } = this;
 
       if (!item || !isAlive(item) || !imageRef.current) return;
-      if (item.isReady !== imageRef.current.complete) item.setReady(imageRef.current.complete);
+      if (item.isReady !== imageRef.current.complete)
+        item.setReady(imageRef.current.complete);
     }
 
     renderTools() {
@@ -1057,161 +1178,240 @@ export default observer(
 
       const imagePositionClassnames = [
         styles.image_position,
-        styles[`image_position__${item.verticalalignment === "center" ? "middle" : item.verticalalignment}`],
+        styles[
+          `image_position__${
+            item.verticalalignment === "center"
+              ? "middle"
+              : item.verticalalignment
+          }`
+        ],
         styles[`image_position__${item.horizontalalignment}`],
       ];
 
-      const wrapperClasses = [styles.wrapperComponent, item.images.length > 1 ? styles.withGallery : styles.wrapper];
+      const wrapperClasses = [
+        styles.wrapperComponent,
+        item.images.length > 1 ? styles.withGallery : styles.wrapper,
+      ];
 
       if (paginationEnabled) wrapperClasses.push(styles.withPagination);
 
-      const [toolsReady, stageLoading] = isFF(FF_LSDV_4583_6) ? [true, false] : [item.hasTools, item.stageWidth <= 1];
+      const [toolsReady, stageLoading] = isFF(FF_LSDV_4583_6)
+        ? [true, false]
+        : [item.hasTools, item.stageWidth <= 1];
 
       const imageIsLoaded = item.imageIsLoaded || !isFF(FF_LSDV_4583_6);
       const isViewingAll = store.annotationStore.viewingAll;
 
       return (
-        <ObjectTag item={item} className={wrapperClasses.join(" ")}>
-          {paginationEnabled ? (
+        <>
+          {this?.state.athleteClothingsData &&
+          this.state.athleteClothingsData.length > 0 ? (
             <div
-              className={styles.pagination}
-              title={isViewingAll ? "Pagination is not supported in View All Annotations" : undefined}
+              style={{
+                backgroundColor: "#FFF7E6",
+                color: "#333",
+                padding: "10px",
+                borderRadius: "6px",
+                marginBottom: "12px",
+                border: "1px solid #FFE7BA",
+              }}
             >
-              <Pagination
-                size="small"
-                outline={false}
-                align="left"
-                noPadding
-                hotkey={{
-                  prev: "image:prev",
-                  next: "image:next",
+              <div>
+                <b>
+                  Clothing details already recorded. Please review the
+                  information below. If it looks correct, you can skip.
+                </b>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  columnGap: "10px",
                 }}
-                currentPage={item.currentImage + 1}
-                totalPages={item.parsedValueList.length}
-                onChange={(n) => item.setCurrentImage(n - 1)}
-                pageSizeSelectable={false}
-                disabled={isViewingAll}
-              />
+              >
+                {this.state.athleteClothingsData.map((clothing, index) => (
+                  <React.Fragment key={index}>
+                    <div>
+                      <span>{clothing.type}:</span>
+                      {clothing.colors &&
+                        Object.entries(clothing.colors).map(
+                          ([key, { color, value }], idx) => (
+                            <div key={idx}>
+                              {key}: {value}
+                            </div>
+                          )
+                        )}
+                    </div>
+                    {index !== this.state.athleteClothingsData.length - 1 && (
+                      <div
+                        style={{
+                          width: "1px",
+                          background: "#FFE7BA",
+                          margin: "0 5px",
+                        }}
+                      />
+                    )}
+                  </React.Fragment>
+                ))}
+              </div>
             </div>
           ) : null}
+          <ObjectTag item={item} className={wrapperClasses.join(" ")}>
+            {paginationEnabled ? (
+              <div
+                className={styles.pagination}
+                title={
+                  isViewingAll
+                    ? "Pagination is not supported in View All Annotations"
+                    : undefined
+                }
+              >
+                <Pagination
+                  size="small"
+                  outline={false}
+                  align="left"
+                  noPadding
+                  hotkey={{
+                    prev: "image:prev",
+                    next: "image:next",
+                  }}
+                  currentPage={item.currentImage + 1}
+                  totalPages={item.parsedValueList.length}
+                  onChange={(n) => item.setCurrentImage(n - 1)}
+                  pageSizeSelectable={false}
+                  disabled={isViewingAll}
+                />
+              </div>
+            ) : null}
 
-          <div
-            ref={(node) => {
-              item.setContainerRef(node);
-              this.attachObserver(node);
-            }}
-            className={containerClassName}
-            style={containerStyle}
-          >
             <div
               ref={(node) => {
-                this.filler = node;
+                item.setContainerRef(node);
+                this.attachObserver(node);
               }}
-              className={styles.filler}
-              style={{ width: "100%", marginTop: item.fillerHeight }}
-            />
-
-            {isFF(FF_LSDV_4583_6) ? (
-              <Image
-                ref={(ref) => {
-                  item.setImageRef(ref);
-                  this.imageRef.current = ref;
+              className={containerClassName}
+              style={containerStyle}
+            >
+              <div
+                ref={(node) => {
+                  this.filler = node;
                 }}
-                usedValue={item.usedValue}
-                imageEntity={item.currentImageEntity}
-                imageTransform={item.imageTransform}
-                updateImageSize={item.updateImageSize}
-                size={item.canvasSize}
-                overlay={<CanvasOverlay item={item} />}
+                className={styles.filler}
+                style={{ width: "100%", marginTop: item.fillerHeight }}
               />
-            ) : (
-              <div className={[styles.frame, ...imagePositionClassnames].join(" ")} style={item.canvasSize}>
-                <img
+
+              {isFF(FF_LSDV_4583_6) ? (
+                <Image
                   ref={(ref) => {
                     item.setImageRef(ref);
                     this.imageRef.current = ref;
                   }}
-                  loading={isFF(FF_DEV_3077) && !item.lazyoff ? "lazy" : "false"}
-                  style={item.imageTransform}
-                  src={item.currentSrc}
-                  onLoad={(e) => {
-                    item.updateImageSize(e);
-                    item.currentImageEntity.setImageLoaded(true);
-                  }}
-                  onError={this.handleError}
-                  crossOrigin={item.imageCrossOrigin}
-                  alt="LS"
+                  usedValue={item.usedValue}
+                  imageEntity={item.currentImageEntity}
+                  imageTransform={item.imageTransform}
+                  updateImageSize={item.updateImageSize}
+                  size={item.canvasSize}
+                  overlay={<CanvasOverlay item={item} />}
                 />
-                <CanvasOverlay item={item} />
+              ) : (
+                <div
+                  className={[styles.frame, ...imagePositionClassnames].join(
+                    " "
+                  )}
+                  style={item.canvasSize}
+                >
+                  <img
+                    ref={(ref) => {
+                      item.setImageRef(ref);
+                      this.imageRef.current = ref;
+                    }}
+                    loading={
+                      isFF(FF_DEV_3077) && !item.lazyoff ? "lazy" : "false"
+                    }
+                    style={item.imageTransform}
+                    src={item.currentSrc}
+                    onLoad={(e) => {
+                      item.updateImageSize(e);
+                      item.currentImageEntity.setImageLoaded(true);
+                    }}
+                    onError={this.handleError}
+                    crossOrigin={item.imageCrossOrigin}
+                    alt="LS"
+                  />
+                  <CanvasOverlay item={item} />
+                </div>
+              )}
+              {/* @todo this is dirty hack; rewrite to proper async waiting for data to load */}
+              {stageLoading || !toolsReady ? (
+                <div className={styles.loading}>
+                  <LoadingOutlined />
+                </div>
+              ) : imageIsLoaded ? (
+                <>
+                  <EntireStage
+                    item={item}
+                    crosshairRef={this.crosshairRef}
+                    onClick={this.handleOnClick}
+                    imagePositionClassnames={imagePositionClassnames}
+                    state={this.state}
+                    onMouseEnter={() => {
+                      if (this.crosshairRef.current) {
+                        this.crosshairRef.current.updateVisibility(true);
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (this.crosshairRef.current) {
+                        this.crosshairRef.current.updateVisibility(false);
+                      }
+                      const { width: stageWidth, height: stageHeight } =
+                        item.canvasSize;
+                      const { offsetX: mouseposX, offsetY: mouseposY } = e.evt;
+                      const newEvent = { ...e };
+
+                      if (mouseposX <= 0) {
+                        e.offsetX = 0;
+                      } else if (mouseposX >= stageWidth) {
+                        e.offsetX = stageWidth;
+                      }
+
+                      if (mouseposY <= 0) {
+                        e.offsetY = 0;
+                      } else if (mouseposY >= stageHeight) {
+                        e.offsetY = stageHeight;
+                      }
+                      this.handleMouseMove(newEvent);
+                    }}
+                    onDragMove={this.updateCrosshair}
+                    onMouseDown={this.handleMouseDown}
+                    onMouseMove={this.handleMouseMove}
+                    onMouseUp={this.handleMouseUp}
+                    onWheel={item.zoom ? this.handleZoom : () => {}}
+                  />
+                </>
+              ) : null}
+            </div>
+
+            {toolsReady && imageIsLoaded && this.renderTools()}
+            {item.images.length > 1 && (
+              <div className={styles.gallery}>
+                {item.images.map((src, i) => (
+                  <img
+                    {...imgDefaultProps}
+                    alt=""
+                    key={src}
+                    src={src}
+                    className={i === item.currentImage && styles.active}
+                    height="60"
+                    onClick={() => item.setCurrentImage(i)}
+                  />
+                ))}
               </div>
             )}
-            {/* @todo this is dirty hack; rewrite to proper async waiting for data to load */}
-            {stageLoading || !toolsReady ? (
-              <div className={styles.loading}>
-                <LoadingOutlined />
-              </div>
-            ) : imageIsLoaded ? (
-              <EntireStage
-                item={item}
-                crosshairRef={this.crosshairRef}
-                onClick={this.handleOnClick}
-                imagePositionClassnames={imagePositionClassnames}
-                state={this.state}
-                onMouseEnter={() => {
-                  if (this.crosshairRef.current) {
-                    this.crosshairRef.current.updateVisibility(true);
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (this.crosshairRef.current) {
-                    this.crosshairRef.current.updateVisibility(false);
-                  }
-                  const { width: stageWidth, height: stageHeight } = item.canvasSize;
-                  const { offsetX: mouseposX, offsetY: mouseposY } = e.evt;
-                  const newEvent = { ...e };
-
-                  if (mouseposX <= 0) {
-                    e.offsetX = 0;
-                  } else if (mouseposX >= stageWidth) {
-                    e.offsetX = stageWidth;
-                  }
-
-                  if (mouseposY <= 0) {
-                    e.offsetY = 0;
-                  } else if (mouseposY >= stageHeight) {
-                    e.offsetY = stageHeight;
-                  }
-                  this.handleMouseMove(newEvent);
-                }}
-                onDragMove={this.updateCrosshair}
-                onMouseDown={this.handleMouseDown}
-                onMouseMove={this.handleMouseMove}
-                onMouseUp={this.handleMouseUp}
-                onWheel={item.zoom ? this.handleZoom : () => {}}
-              />
-            ) : null}
-          </div>
-
-          {toolsReady && imageIsLoaded && this.renderTools()}
-          {item.images.length > 1 && (
-            <div className={styles.gallery}>
-              {item.images.map((src, i) => (
-                <img
-                  {...imgDefaultProps}
-                  alt=""
-                  key={src}
-                  src={src}
-                  className={i === item.currentImage && styles.active}
-                  height="60"
-                  onClick={() => item.setCurrentImage(i)}
-                />
-              ))}
-            </div>
-          )}
-        </ObjectTag>
+          </ObjectTag>
+        </>
       );
     }
-  },
+  }
 );
 
 const EntireStage = observer(
@@ -1255,7 +1455,9 @@ const EntireStage = observer(
         ref={(ref) => {
           item.setStageRef(ref);
         }}
-        className={[styles["image-element"], ...imagePositionClassnames].join(" ")}
+        className={[styles["image-element"], ...imagePositionClassnames].join(
+          " "
+        )}
         width={size.width}
         height={size.height}
         scaleX={item.zoomScale}
@@ -1274,10 +1476,15 @@ const EntireStage = observer(
         onMouseUp={onMouseUp}
         onWheel={onWheel}
       >
-        <StageContent item={item} store={store} state={state} crosshairRef={crosshairRef} />
+        <StageContent
+          item={item}
+          store={store}
+          state={state}
+          crosshairRef={crosshairRef}
+        />
       </Stage>
     );
-  },
+  }
 );
 
 const ImageLayer = observer(({ item }) => {
@@ -1306,7 +1513,12 @@ const ImageLayer = observer(({ item }) => {
       width: imageEntity.naturalWidth,
       height: imageEntity.naturalHeight,
     };
-  }, [imageEntity.naturalWidth, imageEntity.naturalHeight, item.stageWidth, item.stageHeight]);
+  }, [
+    imageEntity.naturalWidth,
+    imageEntity.naturalHeight,
+    item.stageWidth,
+    item.stageHeight,
+  ]);
 
   const brightness = mapKonvaBrightness(imageEntity.brightnessGrade);
   const contrast = imageEntity.contrastGrade - 100;
@@ -1323,8 +1535,17 @@ const ImageLayer = observer(({ item }) => {
   }, [loadedImage, brightness, contrast]);
 
   return loadedImage ? (
-    <Layer imageSmoothingEnabled={item.smoothing} scale={{ x: item.stageZoom, y: item.stageZoom }}>
-      <KonvaImage ref={konvaImageRef} image={loadedImage} width={width} height={height} listening={false} />
+    <Layer
+      imageSmoothingEnabled={item.smoothing}
+      scale={{ x: item.stageZoom, y: item.stageZoom }}
+    >
+      <KonvaImage
+        ref={konvaImageRef}
+        image={loadedImage}
+        width={width}
+        height={height}
+        listening={false}
+      />
     </Layer>
   ) : null;
 });
@@ -1389,8 +1610,22 @@ const CursorLayer = observer(({ item, tool }) => {
         </>
       ) : (
         <>
-          <Circle x={x} y={y} radius={size} stroke="black" strokeWidth={3} strokeScaleEnabled={false} />
-          <Circle x={x} y={y} radius={size} stroke="white" strokeWidth={1} strokeScaleEnabled={false} />
+          <Circle
+            x={x}
+            y={y}
+            radius={size}
+            stroke="black"
+            strokeWidth={3}
+            strokeScaleEnabled={false}
+          />
+          <Circle
+            x={x}
+            y={y}
+            radius={size}
+            stroke="white"
+            strokeWidth={1}
+            strokeScaleEnabled={false}
+          />
         </>
       )}
     </Layer>
@@ -1402,9 +1637,14 @@ const StageContent = observer(({ item, store, state, crosshairRef }) => {
   if (!store.task || !item.currentSrc) return null;
 
   // Keep selected or highlighted region on top
-  const regions = [...item.regs].sort((r) => (r.highlighted || r.selected ? 1 : -1));
+  const regions = [...item.regs].sort((r) =>
+    r.highlighted || r.selected ? 1 : -1
+  );
   const paginationEnabled = !!item.isMultiItem;
-  const wrapperClasses = [styles.wrapperComponent, item.images.length > 1 ? styles.withGallery : styles.wrapper];
+  const wrapperClasses = [
+    styles.wrapperComponent,
+    item.images.length > 1 ? styles.withGallery : styles.wrapper,
+  ];
   const tool = item.getToolsManager().findSelectedTool();
 
   if (paginationEnabled) wrapperClasses.push(styles.withPagination);
@@ -1430,7 +1670,6 @@ const StageContent = observer(({ item, store, state, crosshairRef }) => {
     <>
       {ff.isActive(ff.FF_BITMASK) && <ImageLayer item={item} />}
       {item.grid && item.sizeUpdated && <ImageGrid item={item} />}
-
       {isFF(FF_LSDV_4930) ? <TransformerBack item={item} /> : null}
 
       {renderableRegions.map(([groupName, list]) => {
@@ -1452,8 +1691,9 @@ const StageContent = observer(({ item, store, state, crosshairRef }) => {
       })}
       <Selection item={item} isPanning={state.isPanning} />
       <DrawingRegion item={item} />
-      {ff.isActive(ff.FF_BITMASK) && item.smoothing === false && <PixelGridLayer item={item} />}
-
+      {ff.isActive(ff.FF_BITMASK) && item.smoothing === false && (
+        <PixelGridLayer item={item} />
+      )}
       {item.crosshair && (
         <Crosshair
           ref={crosshairRef}
@@ -1461,8 +1701,9 @@ const StageContent = observer(({ item, store, state, crosshairRef }) => {
           height={isFF(FF_ZOOM_OPTIM) ? item.containerHeight : item.stageHeight}
         />
       )}
-
-      {tool && tool.toolName.match(/bitmask/i) && <CursorLayer item={item} tool={tool} />}
+      {tool && tool.toolName.match(/bitmask/i) && (
+        <CursorLayer item={item} tool={tool} />
+      )}
     </>
   );
 });
