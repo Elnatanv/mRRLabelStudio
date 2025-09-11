@@ -16,6 +16,7 @@ const NormalizationMixin = types
       {}
     ),
     bibId: types.maybe(types.string), // store bib id for the region
+    eventId: types.maybe(types.string), // store bib id for the region
   })
   .actions((self) => ({
     /**
@@ -36,6 +37,9 @@ const NormalizationMixin = types
     },
     setBibId(bibId: string) {
       self.bibId = bibId;
+    },
+    setEventId(eventId: string) {
+      self.eventId = eventId;
     },
 
     setMetaText(text: string) {

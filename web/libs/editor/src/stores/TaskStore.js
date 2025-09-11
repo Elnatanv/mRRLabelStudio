@@ -26,11 +26,15 @@ const TaskStore = types
      */
     data: types.maybeNull(types.string),
     bibId: types.maybeNull(types.string),
+    eventId: types.maybeNull(types.string),
     queue: types.optional(types.maybeNull(types.string), null),
   })
   .actions((self) => ({
     setBibId(bibId) {
       self.bibId = bibId;
+    },
+    setEventId(eventId) {
+      self.eventId = eventId;
     },
   }))
   .views((self) => ({

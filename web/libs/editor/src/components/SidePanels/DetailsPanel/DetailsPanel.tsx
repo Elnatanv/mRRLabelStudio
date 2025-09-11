@@ -190,6 +190,7 @@ const InfoTab: FC<any> = inject("store")(
                   regions={selection}
                   fullImageUrl={fullImageUrl}
                   setBibId={store?.task?.setBibId}
+                  setEventId={store?.task?.setEventId}
                   bibId={store?.task?.bibId}
                 />
               </>
@@ -254,16 +255,19 @@ const RegionsPanel: FC<{
   fullImageUrl: string;
   bibId: string;
   setBibId: (bibId: string) => void;
+  setEventId: (eventId: string) => void;
 }> = observer(function RegionsPanel({
   regions,
   fullImageUrl,
   bibId,
   setBibId,
+  setEventId
 }: {
   regions: any;
   fullImageUrl: string;
   bibId: string;
   setBibId: (bibId: string) => void;
+  setEventId: (eventId: string) => void;
 }): JSX.Element {
   return (
     <div>
@@ -272,6 +276,7 @@ const RegionsPanel: FC<{
           <SelectedRegion
             bibId={bibId}
             setBibId={setBibId}
+            setEventId={setEventId}
             key={reg.id}
             region={reg}
             fullImageUrl={fullImageUrl}
@@ -294,55 +299,80 @@ function rgbToHex([r, g, b]: number[]): string {
   );
 }
 
+// 🎨 Basic color palette (RGB)
+const BASIC_COLORS: Record<string, string> = {
+  red: "#FF0000",
+  darkRed: "#8B0000",
+  orange: "#FFA500",
+  yellow: "#FFFF00",
+  green: "#008000",
+  cyan: "#00FFFF",
+  blue: "#0000FF",
+  purple: "#800080",
+  pink: "#FFC0CB",
+  brown: "#8B4513",
+  gray: "#808080",
+  black: "#000000",
+  white: "#FFFFFF",
+};
+
 export function getBasicColorName(hex: string): string {
-  const color = chroma(hex);
-  const [hue, sat, light] = color.hsl(); // hue 0-360, sat/light 0-1
+  const inputLab = chroma(hex).lab();
+  const [L] = inputLab;
 
-  if (light <= 0.1) return "black"; // very dark
-  if (light >= 0.95) return "white"; // very light
-  if (sat <= 0.15) return "gray"; // low saturation → gray
+  // Step 1: Find the closest basic color by LAB distance
+  let closestName = "unknown";
+  let minDistance = Infinity;
 
-  if (hue >= 0 && hue < 15) {
-    if (light < 0.2) return "brown"; // dark red/orange → brown
-    return "dark red";
+  for (const [name, code] of Object.entries(BASIC_COLORS)) {
+    const lab = chroma(code).lab();
+    const distance = Math.sqrt(
+      Math.pow(inputLab[0] - lab[0], 2) +
+      Math.pow(inputLab[1] - lab[1], 2) +
+      Math.pow(inputLab[2] - lab[2], 2)
+    );
+    if (distance < minDistance) {
+      minDistance = distance;
+      closestName = name;
+    }
   }
 
-  if (hue >= 15 && hue < 45) {
-    if (light < 0.2) return "brown"; // dark orange → brown
-    return "orange";
+  // Step 2: Normalize some variants to main colors
+  const colorMap: Record<string, string> = {
+    darkRed: "red",
+  };
+  closestName = colorMap[closestName] || closestName;
+
+  // Step 3: Add shade modifier based on lightness
+  let shade = "";
+  if (L < 35 && closestName !== "black" && closestName !== "gray") {
+    shade = "dark ";
+  } else if (L > 75 && closestName !== "white" && closestName !== "gray") {
+    shade = "light ";
   }
 
-  if (hue >= 45 && hue < 70) return "yellow";
-  if (hue >= 70 && hue < 170) return "green";
-  if (hue >= 170 && hue < 200) return "cyan";
-  if (hue >= 200 && hue < 260) return "blue";
-  if (hue >= 260 && hue < 320) {
-    if (light > 0.6) return "pink"; // light purple → pink
-    return "purple";
-  }
-  if (hue >= 320 && hue < 360) {
-    if (light > 0.4) return "pink"; // light red → pink
-    if (light < 0.4) return "brown"; // dark reddish → brown
-    return "red";
-  }
-
-  return "unknown";
+  return shade + closestName;
 }
+
+
 const SelectedRegion: FC<{
   region: any;
   fullImageUrl: string;
   bibId: string;
   setBibId: (bibId: string) => void;
+  setEventId: (eventId: string) => void;
 }> = observer(function SelectedRegion({
   region,
   fullImageUrl,
   bibId,
   setBibId,
+  setEventId
 }: {
   region: any;
   fullImageUrl: string;
   bibId: string;
   setBibId: (bibId: string) => void;
+  setEventId: (eventId: string) => void;
 }): JSX.Element {
   const [dominantHex, setDominantHex] = useState(
     region?.detectedColor?.primary?.color || "#ffffff"
@@ -358,6 +388,7 @@ const SelectedRegion: FC<{
   const [palette, setPalette] = useState<string[]>([]);
   useEffect(() => {
     setBibId(fullImageUrl.split("-")[1].split("_")[0]);
+    setEventId(fullImageUrl.split("-")[1].split("_")[1]);
   }, []);
 
   useEffect(() => {

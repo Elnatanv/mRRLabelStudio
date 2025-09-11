@@ -1136,8 +1136,40 @@ const _Annotation = types
         .concat(self.relationStore.serialize(options));
 
       document.body.style.cursor = "default";
-      console.log("---", result, task, task.bibId);
+      console.log(
+        "getting ready for db",
+        result,
+        task,
+        task.bibId,
+        task.eventId
+      );
+      const clothingForDb = result.map((res) => ({
+        type: res.value[res.type][0],
+        colors: res.detectedColor,
+        brand: res.brand,
+      }));
       //TODO:: store the info to db
+      console.log("getting ready for db clothing", clothingForDb);
+      const apiUrl =
+        "https://api.myracereel.com/api/athletes/:bib/:eventId/updateAthleteClothings";
+
+      fetch(
+        apiUrl.replace(":bib", task.bibId).replace(":eventId", task.eventId),
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ clothings: clothingForDb }),
+        }
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Success:", data);
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
 
       return result;
     },

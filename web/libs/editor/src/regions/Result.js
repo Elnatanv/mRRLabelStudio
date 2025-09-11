@@ -99,6 +99,7 @@ const Result = types
     detectedColor: types.optional(types.frozen(), {}),
     brand: types.maybe(types.string),
     bibId: types.maybe(types.string),
+    eventId: types.maybe(types.string),
     // @todo some general type, maybe just a `string`
     type: ff.isActive(ff.FF_CUSTOM_TAGS)
       ? types.late(() =>
@@ -392,6 +393,7 @@ const Result = types
       const brand = self.area.brand;
       const task = self.store.task;
       const bibId = task.bibId;
+      const eventId = task.eventId;
 
       if (!data) return null;
       if (!self.canBeSubmitted) return null;
@@ -430,6 +432,7 @@ const Result = types
         detectedColor,
         brand,
         bibId,
+        eventId,
         origin: self.area.origin,
       });
 
