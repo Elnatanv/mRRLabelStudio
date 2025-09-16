@@ -36,7 +36,11 @@ export type ExtractOption<T> = T extends SelectOption<any>
     : ExtractPrimitiveOption<T>
   : never;
 
-export type ExtractValue<T, A extends SelectOption<T>[]> = A[number] extends { value: infer U } ? U : A[number];
+export type ExtractValue<T, A extends SelectOption<T>[]> = A[number] extends {
+  value: infer U;
+}
+  ? U
+  : A[number];
 
 export type SelectProps<T, A extends SelectOption<T>[]> = {
   label?: string;
@@ -77,12 +81,19 @@ export type SelectProps<T, A extends SelectOption<T>[]> = {
   size?: SelectSize | undefined;
   onSearch?: (value: string) => void;
   selectFirstIfEmpty?: boolean;
-  renderSelected?: (selectedOptions?: A[number][], placeholder?: string) => React.ReactNode | string;
+  renderSelected?: (
+    selectedOptions?: A[number][],
+    placeholder?: string
+  ) => React.ReactNode | string;
   isVirtualList?: boolean;
   loadMore?: () => void;
   pageSize?: number;
   page?: number;
   itemCount?: number;
+  addToTheListHandler?: (
+    searchValue: string,
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) => void;
 } & SelectVirtualizedProps &
   Omit<React.SelectHTMLAttributes<HTMLSelectElement>, "value" | "placeholder">;
 

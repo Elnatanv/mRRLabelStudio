@@ -55,6 +55,7 @@ const EventPageComponent = () => {
               status: obj.status,
             }))
         : [];
+      console.log("Filtered Data:", filtered);
 
       setFilteredData(filtered);
     } catch (err) {

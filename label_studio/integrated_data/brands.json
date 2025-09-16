@@ -1,0 +1,224 @@
+{
+  "Nike": [
+    "Air Zoom Pegasus",
+    "Air Max",
+    "ZoomX Vaporfly"
+  ],
+  "Adidas": [
+    "Ultraboost",
+    "Adizero Adios",
+    "SolarGlide"
+  ],
+  "Puma": [
+    "Deviate Nitro",
+    "Velocity Nitro",
+    "Future Rider"
+  ],
+  "Under Armour": [
+    "HOVR Phantom",
+    "Charged Assert",
+    "Flow Velociti"
+  ],
+  "Reebok": [
+    "Nano X",
+    "Floatride Energy",
+    "Classic Leather"
+  ],
+  "New Balance": [
+    "Fresh Foam 1080",
+    "FuelCell Rebel",
+    "860v13"
+  ],
+  "ASICS": [
+    "Gel-Kayano",
+    "Gel-Nimbus",
+    "Metaspeed Sky"
+  ],
+  "Columbia": [
+    "Facet 75",
+    "Montrail Trinity",
+    "Fairbanks Omni-Heat"
+  ],
+  "The North Face": [
+    "Vectiv Enduris",
+    "Vectiv Infinite",
+    "Flight Vectiv"
+  ],
+  "Patagonia": [
+    "Storm Racer",
+    "Nine Trails",
+    "Torrentshell"
+  ],
+  "Fila": [
+    "Disruptor II",
+    "Ray Tracer",
+    "Mindblower"
+  ],
+  "Champion": [
+    "Rally Pro",
+    "Super C Court",
+    "Zone Mid"
+  ],
+  "Lululemon": [
+    "Chargefeel",
+    "Blissfeel",
+    "Strongfeel"
+  ],
+  "Mizuno": [
+    "Wave Rider",
+    "Wave Inspire",
+    "Wave Sky"
+  ],
+  "Salomon": [
+    "Speedcross",
+    "XA Pro 3D",
+    "Sense Ride"
+  ],
+  "Brooks": [
+    "Ghost 15",
+    "Adrenaline GTS",
+    "Glycerin"
+  ],
+  "Hoka One One": [
+    "Clifton",
+    "Bondi",
+    "Speedgoat"
+  ],
+  "Saucony": [
+    "Kinvara",
+    "Triumph",
+    "Endorphin Pro"
+  ],
+  "Oakley": [
+    "EVZero Path",
+    "Radar EV",
+    "Flak 2.0"
+  ],
+  "Ralph Lauren": [
+    "Polo Sneakers",
+    "Heritage Court",
+    "Train 89"
+  ],
+  "361 Degrees": [
+    "Meraki",
+    "Spire",
+    "Sensation"
+  ],
+  "Altra": [
+    "Torin",
+    "Lone Peak",
+    "Escalante",
+    "test"
+  ],
+  "Arc'teryx": [
+    "Norvan LD",
+    "Aerios FL",
+    "Konseal FL"
+  ],
+  "Craft": [
+    "CTM Ultra",
+    "Pro Endur",
+    "X165 Engineered"
+  ],
+  "Diadora": [
+    "Mythos Blushield",
+    "Equinoxe",
+    "N9000"
+  ],
+  "Dynafit": [
+    "Alpine DNA",
+    "Ultra 100",
+    "Trailbreaker"
+  ],
+  "Hi-Tec": [
+    "Altitude VI",
+    "Ravus WP",
+    "Bandera"
+  ],
+  "Higher State": [
+    "Freedom Run",
+    "Soar Cushion",
+    "Trail Elite"
+  ],
+  "Hoka": [
+    "Mach",
+    "Arahi",
+    "Rincon"
+  ],
+  "Innov8": [
+    "Trailfly G 270",
+    "X-Talon",
+    "Roclite"
+  ],
+  "Karrimor": [
+    "Duma",
+    "Tempo",
+    "Hot Rock"
+  ],
+  "Kiprun": [
+    "KD900X",
+    "KS500",
+    "Ultralight"
+  ],
+  "La Sportiva": [
+    "Bushido II",
+    "Jackal",
+    "Akasha"
+  ],
+  "Merrell": [
+    "Moab 3",
+    "Trail Glove",
+    "Agility Peak"
+  ],
+  "NNormal": [
+    "Kjerag",
+    "Tomir"
+  ],
+  "Norda": [
+    "001",
+    "002"
+  ],
+  "On": [
+    "Cloudswift",
+    "Cloudflow",
+    "Cloudmonster"
+  ],
+  "Scarpa": [
+    "Spin Ultra",
+    "Ribelle Run",
+    "Golden Gate Kima"
+  ],
+  "Scott": [
+    "Kinabalu",
+    "Supertrac RC",
+    "Speed Carbon RC"
+  ],
+  "Skechers": [
+    "GoRun Razor",
+    "GoRun Ride",
+    "Max Cushioning"
+  ],
+  "Speedland": [
+    "SL:HSV",
+    "SL:PDX",
+    "SL:STL"
+  ],
+  "Topo": [
+    "Ultraventure",
+    "Phantom",
+    "Magnifly"
+  ],
+  "TrueMotion": [
+    "U-Tech Nevos",
+    "U-Tech Solo",
+    "U-Tech Aion"
+  ],
+  "VivoBarefoot": [
+    "Primus Lite",
+    "Geo Racer",
+    "Tracker Forest"
+  ],
+  "Test": [
+    "test model"
+  ]
+}

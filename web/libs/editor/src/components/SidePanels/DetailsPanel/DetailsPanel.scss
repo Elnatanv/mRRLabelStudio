@@ -1,3 +1,14 @@
+
+/* Base option text color */
+.ant-select-item-option-content {
+  color: white !important;
+}
+
+/* On hover */
+.ant-select-item-option-active {
+  background-color: #1a1a1a !important;
+  color: white !important;
+}
 .details,
 .history,
 .relations,
