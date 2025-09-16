@@ -396,7 +396,7 @@ const SelectedRegion: FC<{
     setEventId(fullImageUrl.split("-")[1].split("_")[1]);
 
     // Place this inside your component:
-    fetch("http://localhost:8010/integrated-data/", {
+    fetch("/integrated-data/", {
       method: "GET",
       headers: {
         Accept: "*/*",
@@ -420,7 +420,7 @@ const SelectedRegion: FC<{
 
   useEffect(() => {
     if (brand && isShoesRegion) {
-      fetch(`http://localhost:8010/brands/${encodeURIComponent(brand)}/`, {
+      fetch(`/brands/${encodeURIComponent(brand)}/`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -629,7 +629,7 @@ const SelectedRegion: FC<{
             if (!brands.includes(value)) {
               const updatedBrands = [...brands, value];
               setBrands(updatedBrands);
-              const url = "http://localhost:8010/integrated-data/";
+              const url = "/integrated-data/";
               fetch(url, {
                 method: "PUT",
                 headers: {
@@ -667,7 +667,7 @@ const SelectedRegion: FC<{
                 if (!shoeModels.includes(value)) {
                   const updatedShoeModels = [...shoeModels, value];
                   setShoeModels(updatedShoeModels);
-                  const url = `http://localhost:8010/brands/${encodeURIComponent(
+                  const url = `/brands/${encodeURIComponent(
                     brand
                   )}/`;
                   fetch(url, {

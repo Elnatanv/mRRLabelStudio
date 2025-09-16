@@ -1,3 +1,11 @@
+[project]
+name = "label-studio"
+version = "1.22.0.dev0"
+description = "Label Studio annotation tool"
+readme = "README.md"
+license = "Apache-2.0"
+authors = ["HumanSignal <support@humansignal.com>"]
+
 [tool.poetry]
 name = "label-studio"
 version = "1.22.0.dev0"
