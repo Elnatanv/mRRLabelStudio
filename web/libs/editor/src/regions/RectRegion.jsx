@@ -584,6 +584,7 @@ const Model = types
         rotation: self.rotation,
         detectedColor: self.detectedColor,
         brand: self.brand,
+        shoeModel: self.shoeModel,
         bibId: self.bibId,
       };
 

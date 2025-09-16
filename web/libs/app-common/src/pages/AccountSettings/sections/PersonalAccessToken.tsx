@@ -27,7 +27,7 @@ const resetTokenAtom = atomWithMutation(() => ({
   },
 }));
 
-const currentTokenAtom = atom((get) => {
+export const currentTokenAtom = atom((get) => {
   const initialToken = get(tokenAtom).data?.token;
   const resetToken = get(resetTokenAtom).data?.token;
 

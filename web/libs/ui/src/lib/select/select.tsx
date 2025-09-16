@@ -1,4 +1,12 @@
-import React, { type ForwardedRef, forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  type ForwardedRef,
+  forwardRef,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import {
   Command,
@@ -8,7 +16,11 @@ import {
   CommandItem,
   CommandList,
 } from "@humansignal/shad/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@humansignal/shad/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@humansignal/shad/components/ui/popover";
 import type { SelectOption, OptionProps, SelectProps } from "./types.ts";
 import { Checkbox, Label } from "@humansignal/ui";
 import { isDefined } from "@humansignal/core/lib/utils/helpers";
@@ -87,20 +99,29 @@ export const Select = forwardRef(
       pageSize = VARIABLE_LIST_PAGE_SIZE,
       page = 1,
       itemCount,
+      addToTheListHandler,
       ...props
     }: SelectProps<T, A>,
-    _ref: ForwardedRef<HTMLSelectElement>,
+    _ref: ForwardedRef<HTMLSelectElement>
   ) => {
     const ref = _ref ?? useRef<HTMLSelectElement>();
     const triggerRef = useRef<HTMLDivElement>();
     const [query, setQuery] = useState<string>("");
     const valueRef = useRef<any>();
-    let initialValue = defaultValue?.value ?? defaultValue ?? externalValue?.value ?? externalValue;
+    let initialValue =
+      defaultValue?.value ??
+      defaultValue ??
+      externalValue?.value ??
+      externalValue;
     if (selectFirstIfEmpty && !initialValue) {
       initialValue = options?.[0]?.value ?? options?.[0];
     }
     if (multiple) {
-      initialValue = initialValue ? (Array.isArray(initialValue) ? (initialValue ?? []) : [initialValue]) : [];
+      initialValue = initialValue
+        ? Array.isArray(initialValue)
+          ? initialValue ?? []
+          : [initialValue]
+        : [];
     } else if (Array.isArray(initialValue)) {
       initialValue = initialValue[0];
     }
@@ -154,7 +175,7 @@ export const Select = forwardRef(
           ref?.current?.dispatchEvent?.(changeEvent);
         }, 0);
       },
-      [props?.onChange, multiple, disabled],
+      [props?.onChange, multiple, disabled]
     );
 
     const flatOptions = useMemo(() => {
@@ -168,11 +189,16 @@ export const Select = forwardRef(
         const value = option?.value ?? option;
         const label = option?.label ?? option?.value ?? option;
         return (
-          label?.toString()?.toLowerCase().includes(queryString.toLowerCase()) ||
+          label
+            ?.toString()
+            ?.toLowerCase()
+            .includes(queryString.toLowerCase()) ||
           value?.toString()?.toLowerCase().includes(queryString.toLowerCase())
         );
       };
-      return flatOptions.filter((option) => (searchFilter ?? filterHandler)(option, query));
+      return flatOptions.filter((option) =>
+        (searchFilter ?? filterHandler)(option, query)
+      );
     }, [options, flatOptions, searchable, query, searchFilter]);
 
     const isSelected = useCallback(
@@ -182,7 +208,7 @@ export const Select = forwardRef(
         }
         return (value?.value ?? value) === (val?.value ?? val);
       },
-      [value, multiple],
+      [value, multiple]
     );
 
     const selectedOptions = useMemo(() => {
@@ -205,7 +231,7 @@ export const Select = forwardRef(
         setQuery(val);
         onSearch?.(val);
       },
-      [setQuery, onSearch],
+      [setQuery, onSearch]
     );
 
     useEffect(() => {
@@ -222,12 +248,17 @@ export const Select = forwardRef(
               {selectedOptions?.map((option, index) => {
                 if (selectedValueRenderer) {
                   return (
-                    <React.Fragment key={`${option?.value}_${index}`}>{selectedValueRenderer(option)}</React.Fragment>
+                    <React.Fragment key={`${option?.value}_${index}`}>
+                      {selectedValueRenderer(option)}
+                    </React.Fragment>
                   );
                 }
                 const optionValue = option?.value ?? option;
                 return (
-                  <span key={`${optionValue}_${index}`} className="truncate only:w-full">
+                  <span
+                    key={`${optionValue}_${index}`}
+                    className="truncate only:w-full"
+                  >
                     {option?.label ?? optionValue}
                   </span>
                 );
@@ -245,9 +276,12 @@ export const Select = forwardRef(
         const optionValue = option?.value ?? option;
         const label = option?.label ?? optionValue;
         const children = option?.children;
-        const isIndeterminate = multiple && children?.some((child) => isSelected(child));
+        const isIndeterminate =
+          multiple && children?.some((child) => isSelected(child));
         const isOptionSelected =
-          multiple && children ? children?.every((child) => isSelected(child)) : isSelected(optionValue);
+          multiple && children
+            ? children?.every((child) => isSelected(child))
+            : isSelected(optionValue);
 
         if (children) {
           return (
@@ -261,12 +295,16 @@ export const Select = forwardRef(
                   onSelect={() => {
                     children.forEach((child: SelectOption<T>) => {
                       const childVal = child?.value ?? child;
-                      isOptionSelected ? _onChange(childVal, true) : _onChange(childVal, false);
+                      isOptionSelected
+                        ? _onChange(childVal, true)
+                        : _onChange(childVal, false);
                     });
                   }}
                 />
               ) : (
-                <div className="pl-3 font-bold text-neutral-content-subtler pt-2">{label}</div>
+                <div className="pl-3 font-bold text-neutral-content-subtler pt-2">
+                  {label}
+                </div>
               )}
               <div className="pl-2">
                 {children.map((item, i) => {
@@ -326,7 +364,9 @@ export const Select = forwardRef(
             type="button"
             data-testid={
               props?.dataTestid ??
-              `select-trigger${props?.name ? `-${props?.name?.replace?.(/\s/g, "-")}` : ""}${value ? `-${value}` : ""}`
+              `select-trigger${
+                props?.name ? `-${props?.name?.replace?.(/\s/g, "-")}` : ""
+              }${value ? `-${value}` : ""}`
             }
             ref={triggerRef}
             data-name={props?.name}
@@ -337,7 +377,9 @@ export const Select = forwardRef(
               className="flex flex-1 text-left gap-2 max-w-full w-[calc(100%-1rem-0.5rem)]"
               data-testid="select-display-value"
             >
-              {renderSelected ? renderSelected?.(selectedOptions, props?.placeholder) : displayValue}
+              {renderSelected
+                ? renderSelected?.(selectedOptions, props?.placeholder)
+                : displayValue}
             </span>
             {isOpen ? (
               <IconChevron className="h-4 w-4 shrink-0 opacity-50 pointer-events-none" />
@@ -346,7 +388,11 @@ export const Select = forwardRef(
             )}
           </button>
         </PopoverTrigger>
-        <PopoverContent align="start" data-testid="select-popup" className={contentClassName}>
+        <PopoverContent
+          align="start"
+          data-testid="select-popup"
+          className={contentClassName}
+        >
           {isLoading ? (
             <span className={styles.selectLoading} tabIndex={-1}>
               Loading...
@@ -364,12 +410,32 @@ export const Select = forwardRef(
               <CommandList
                 label="Select an option"
                 className={
-                  searchable ? "shadow-inner shadow-neutral-surface-inset border-t border-neutral-border shadow-" : ""
+                  searchable
+                    ? "shadow-inner shadow-neutral-surface-inset border-t border-neutral-border shadow-"
+                    : ""
                 }
               >
-                <CommandEmpty>{searchable ? "No results found." : ""}</CommandEmpty>
+                <CommandEmpty>
+                  {searchable && (
+                    <div>
+                      <div>"No results found."</div>
+                      {query === "" && <div>Type something in order to add it to the list</div>}
+                      {addToTheListHandler && query !== "" ? (
+                        <div
+                          onClick={(e) => addToTheListHandler(query, e)}
+                          style={{
+                            textDecoration: "underline",
+                            cursor: "pointer",
+                          }}
+                        >
+                          Add "{query}" to the list
+                        </div>
+                      ) : null}
+                    </div>
+                  ) }
+                </CommandEmpty>
                 <CommandGroup>
-                  {props.header ? props.header : null}
+                  {props.header ? props.header as string : null}
                   {isVirtualList ? (
                     <InfiniteLoader
                       itemCount={itemCount ?? renderedOptions.length}
@@ -381,7 +447,10 @@ export const Select = forwardRef(
                       {({
                         onItemsRendered,
                         ref: infiniteLoaderRef,
-                      }: { onItemsRendered: (params: any) => void; ref: any }) => {
+                      }: {
+                        onItemsRendered: (params: any) => void;
+                        ref: any;
+                      }) => {
                         return (
                           <VariableSizeList
                             itemData={renderedOptions}
@@ -394,7 +463,11 @@ export const Select = forwardRef(
                             overscanCount={1}
                           >
                             {({ index, style }) => {
-                              return <div style={style}>{renderedOptions[index]}</div>;
+                              return (
+                                <div style={style}>
+                                  {renderedOptions[index]}
+                                </div>
+                              );
                             }}
                           </VariableSizeList>
                         );
@@ -417,7 +490,10 @@ export const Select = forwardRef(
           onChange={() => {}} // Prevents the React uncontrolled select component warning message
         >
           {selectedOptions?.map((option, index) => (
-            <option key={`${option?.value}_${index}`} value={option?.value ?? option} />
+            <option
+              key={`${option?.value}_${index}`}
+              value={option?.value ?? option}
+            />
           ))}
         </select>
       </Popover>
@@ -425,13 +501,18 @@ export const Select = forwardRef(
 
     if (label) {
       return (
-        <Label required={required} description={description} text={label} {...labelProps}>
+        <Label
+          required={required}
+          description={description}
+          text={label}
+          {...labelProps}
+        >
           {combobox}
         </Label>
       );
     }
     return combobox;
-  },
+  }
 );
 
 const Option = ({
@@ -469,7 +550,7 @@ const Option = ({
         }
       }
     },
-    [onSelect, value],
+    [onSelect, value]
   );
   return (
     <CommandItem
@@ -497,7 +578,7 @@ const Option = ({
           "data-[disabled=true]:opacity-50",
           "data-[disabled=true]:cursor-not-allowed",
           "data-[disabled=true]:bg-transparent",
-        ],
+        ]
       )}
     >
       <div
@@ -516,11 +597,18 @@ const Option = ({
             "hover:data-[disabled=true]:cursor-not-allowed",
             "duration-150 ease-out",
           ],
-          !multiple && isOptionSelected && ["bg-primary-emphasis"],
+          !multiple && isOptionSelected && ["bg-primary-emphasis"]
         )}
         data-disabled={disabled}
       >
-        {multiple && <Checkbox tabIndex={-1} checked={isOptionSelected} indeterminate={isIndeterminate} readOnly />}
+        {multiple && (
+          <Checkbox
+            tabIndex={-1}
+            checked={isOptionSelected}
+            indeterminate={isIndeterminate}
+            readOnly
+          />
+        )}
         <div data-testid="select-option-label" className="w-full">
           {label}
         </div>

@@ -1,7 +1,8 @@
 import { inject, observer } from "mobx-react";
 import { useState, type FC, useEffect } from "react";
+// import { Select } from "antd";
+import { getCurrentTheme, Select } from "@humansignal/ui";
 import ColorThief from "colorthief";
-
 import chroma from "chroma-js";
 import { Block, Elem } from "../../../utils/bem";
 import { Comments as CommentsComponent } from "../../Comments/Comments";
@@ -18,6 +19,7 @@ import { EmptyState } from "../Components/EmptyState";
 import { IconCursor, IconRelationLink } from "@humansignal/icons";
 import { getDocsUrl } from "../../../utils/docs";
 import ShoesColorSelector from "./components/ShoesColorSelector";
+// import { brands } from "./constants";
 
 interface DetailsPanelProps extends PanelProps {
   regions: any;
@@ -204,7 +206,6 @@ const InfoTab: FC<any> = inject("store")(
 
 const GeneralPanel: FC<any> = inject("store")(
   observer(function GeneralPanel({ store, currentEntity }: any): JSX.Element {
-    console.log(store);
     const { relationStore } = currentEntity;
     const showAnnotationHistory = store.hasInterface("annotations:history");
     return (
@@ -261,7 +262,7 @@ const RegionsPanel: FC<{
   fullImageUrl,
   bibId,
   setBibId,
-  setEventId
+  setEventId,
 }: {
   regions: any;
   fullImageUrl: string;
@@ -328,8 +329,8 @@ export function getBasicColorName(hex: string): string {
     const lab = chroma(code).lab();
     const distance = Math.sqrt(
       Math.pow(inputLab[0] - lab[0], 2) +
-      Math.pow(inputLab[1] - lab[1], 2) +
-      Math.pow(inputLab[2] - lab[2], 2)
+        Math.pow(inputLab[1] - lab[1], 2) +
+        Math.pow(inputLab[2] - lab[2], 2)
     );
     if (distance < minDistance) {
       minDistance = distance;
@@ -354,7 +355,6 @@ export function getBasicColorName(hex: string): string {
   return shade + closestName;
 }
 
-
 const SelectedRegion: FC<{
   region: any;
   fullImageUrl: string;
@@ -366,7 +366,7 @@ const SelectedRegion: FC<{
   fullImageUrl,
   bibId,
   setBibId,
-  setEventId
+  setEventId,
 }: {
   region: any;
   fullImageUrl: string;
@@ -383,13 +383,57 @@ const SelectedRegion: FC<{
   const [accentHex, setAccentHex] = useState(
     region?.detectedColor?.accent?.color || "#ffffff"
   );
-
-  const [brand, setBrand] = useState(region?.brand || "")
+  const [brands, setBrands] = useState<string[]>([]);
+  const [brand, setBrand] = useState(region?.brand || null);
+  const [shoeModels, setShoeModels] = useState<string[]>([]);
+  const [shoeModel, setShoeModel] = useState(region?.shoeModel || null);
   const [palette, setPalette] = useState<string[]>([]);
+
+  const isShoesRegion = region?.labelName.toLowerCase() === "shoes";
+
   useEffect(() => {
     setBibId(fullImageUrl.split("-")[1].split("_")[0]);
     setEventId(fullImageUrl.split("-")[1].split("_")[1]);
+
+    // Place this inside your component:
+    fetch("http://localhost:8010/integrated-data/", {
+      method: "GET",
+      headers: {
+        Accept: "*/*",
+      },
+      credentials: "include",
+    })
+      .then((response) =>
+        response.json().then((data) => {
+          console.log("Fetched integrated data:", data);
+          if (data && Array.isArray(data)) {
+            setBrands(data);
+          } else {
+            console.warn("No brands found in the fetched data");
+          }
+        })
+      )
+      .catch((error) => {
+        console.error("Error fetching integrated data:", error);
+      });
   }, []);
+
+  useEffect(() => {
+    if (brand && isShoesRegion) {
+      fetch(`http://localhost:8010/brands/${encodeURIComponent(brand)}/`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          setShoeModels(data[brand] || []);
+          console.log("Models for", brand, ":", data);
+        })
+        .catch((err) => console.error(err));
+    }
+  }, [brand]);
 
   useEffect(() => {
     if (!region || !fullImageUrl) return;
@@ -447,8 +491,6 @@ const SelectedRegion: FC<{
     };
   }, [region, fullImageUrl]); // only rerun if these change
 
-  const isShoesRegion = region?.labelName.toLowerCase() === "shoes";
-  
   return (
     <>
       {isShoesRegion ? (
@@ -576,39 +618,85 @@ const SelectedRegion: FC<{
         </div>
       )}
       <div style={{ margin: "10px 0" }}>
-        <label htmlFor="brand-select">Brand:</label>
-        <select
+        <label htmlFor="brand-select" style={{marginBottom: "4px"}}>Brand:</label>
+        <Select
+          searchable
           id="brand-select"
-         
+          searchPlaceholder="Search to Select"
           value={brand || ""}
-          onChange={(e) => {
-            setBrand(e.target.value);
-            region.setBrand?.(e.target.value);
+          addToTheListHandler={(value, e) => {
+            e.stopPropagation();
+            if (!brands.includes(value)) {
+              const updatedBrands = [...brands, value];
+              setBrands(updatedBrands);
+              const url = "http://localhost:8010/integrated-data/";
+              fetch(url, {
+                method: "PUT",
+                headers: {
+                  "Content-Type": "application/json",
+                  Accept: "*/*",
+                },
+                credentials: "include",
+                body: JSON.stringify({
+                  items: [value],
+                }),
+              })
+                .then((res) => res.json())
+                .then((data) => console.log(data))
+                .catch((err) => console.error(err));
+            }
           }}
-          style={{ marginLeft: "8px", color: "black" }}
-        >
-          <option value="">Select a brand</option>
-          <option value="Nike">Nike</option>
-          <option value="Adidas">Adidas</option>
-          <option value="Puma">Puma</option>
-          <option value="Under Armour">Under Armour</option>
-          <option value="Reebok">Reebok</option>
-          <option value="New Balance">New Balance</option>
-          <option value="ASICS">ASICS</option>
-          <option value="Columbia">Columbia</option>
-          <option value="The North Face">The North Face</option>
-          <option value="Patagonia">Patagonia</option>
-          <option value="Fila">Fila</option>
-          <option value="Champion">Champion</option>
-          <option value="Lululemon">Lululemon</option>
-          <option value="Mizuno">Mizuno</option>
-          <option value="Salomon">Salomon</option>
-          <option value="Brooks">Brooks</option>
-          <option value="Hoka One One">Hoka One One</option>
-          <option value="Saucony">Saucony</option>
-          <option value="Oakley">Oakley</option>
-          <option value="Ralph Lauren">Ralph Lauren</option>
-        </select>
+          onChange={(value) => {
+            setBrand(value);
+            console.log("Selected brand:", value);
+            region.setBrand?.(value);
+          }}
+          style={{ width: "100%", marginBottom: "10px" }}
+          options={brands.sort().map((b) => ({ value: b, label: b }))}
+        ></Select>
+        {isShoesRegion && Array.isArray(shoeModels) ? (
+          <div>
+            <label htmlFor="brand-select" style={{marginBottom: "4px"}}>Shoe model:</label>
+            <Select
+              searchable
+              id="shoeModel-select"
+              searchPlaceholder="Search to Select"
+              value={shoeModel || ""}
+              addToTheListHandler={(value, e) => {
+                e.stopPropagation();
+                if (!shoeModels.includes(value)) {
+                  const updatedShoeModels = [...shoeModels, value];
+                  setShoeModels(updatedShoeModels);
+                  const url = `http://localhost:8010/brands/${encodeURIComponent(
+                    brand
+                  )}/`;
+                  fetch(url, {
+                    method: "PUT",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Accept: "*/*",
+                    },
+                    credentials: "include",
+                    body: JSON.stringify({
+                      models: [value],
+                    }),
+                  })
+                    .then((res) => res.json())
+                    .then((data) => console.log(data))
+                    .catch((err) => console.error(err));
+                }
+              }}
+              onChange={(value) => {
+                setShoeModel(value);
+                region.setShoeModel?.(value);
+              }}
+              style={{ width: "100%",marginBottom: "10px" }}
+              options={shoeModels
+                .sort()
+                .map((b: string) => ({ value: b, label: b }))}
+            ></Select>
+          </div>
+        ) : null}
       </div>
       <RegionItem
         region={region}

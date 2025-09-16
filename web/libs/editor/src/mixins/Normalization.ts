@@ -15,6 +15,7 @@ const NormalizationMixin = types
       types.frozen<Record<string, { value: string; color: string }>>(),
       {}
     ),
+    shoeModel: types.maybe(types.string), // store shoe model for the region
     bibId: types.maybe(types.string), // store bib id for the region
     eventId: types.maybe(types.string), // store bib id for the region
   })
@@ -34,6 +35,9 @@ const NormalizationMixin = types
     },
     setBrand(value: string) {
       self.brand = value;
+    },
+    setShoeModel(value: string) {
+      self.shoeModel = value;
     },
     setBibId(bibId: string) {
       self.bibId = bibId;

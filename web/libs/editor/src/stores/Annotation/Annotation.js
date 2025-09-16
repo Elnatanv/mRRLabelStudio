@@ -1147,6 +1147,7 @@ const _Annotation = types
         type: res.value[res.type][0],
         colors: res.detectedColor,
         brand: res.brand,
+        shoeModel: res.shoeModel ? res.shoeModel : null,
       }));
       //TODO:: store the info to db
       console.log("getting ready for db clothing", clothingForDb);
