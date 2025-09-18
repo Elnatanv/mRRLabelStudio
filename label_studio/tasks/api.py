@@ -24,6 +24,10 @@ from rest_framework import generics, viewsets
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
+from django.core.files import File
+
+from django.conf import settings
+import os
 from tasks.models import Annotation, AnnotationDraft, Prediction, Task
 from tasks.openapi_schema import (
     annotation_request_schema,
@@ -181,16 +185,18 @@ class TaskListAPI(DMTaskListAPI):
         GET=all_permissions.tasks_view,
         POST=all_permissions.tasks_create,
     )
+    
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['project']
-
     def filter_queryset(self, queryset):
         queryset = super().filter_queryset(queryset)
+        print(">>> get_queryset CALLED")
         return queryset.filter(project__organization=self.request.user.active_organization)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
         project_id = self.request.data.get('project')
+        
         if project_id:
             context['project'] = generics.get_object_or_404(Project, pk=project_id)
         return context
@@ -317,7 +323,7 @@ class TaskAPI(generics.RetrieveUpdateDestroyAPIView):
     def get(self, request, pk):
         context = self.get_retrieve_serializer_context(request)
         context['project'] = project = self.task.project
-
+        
         # get prediction
         if (
             project.evaluate_predictions_automatically or project.show_collab_predictions
@@ -377,7 +383,60 @@ class TaskAPI(generics.RetrieveUpdateDestroyAPIView):
 
     @extend_schema(exclude=True)
     def put(self, request, *args, **kwargs):
+        if "new_bib" in request.data:
+            return self.update_task_bib_image(request, *args, **kwargs)
+        # fallback to default behavior
         return super(TaskAPI, self).put(request, *args, **kwargs)
+
+
+    def update_task_bib_image(self, request, *args, **kwargs):
+        task = self.get_object()
+        new_bib = request.data.get('new_bib')
+
+        if not new_bib:
+            return Response({'error': 'new_bib is required'}, status=400)
+
+        # get old file URL from task.data
+        old_file_url = list(task.data.values())[0]
+        if not old_file_url:
+            return Response({'error': 'No image found for this task'}, status=400)
+
+        # convert URL to local path
+        relative_path = old_file_url.lstrip("/").removeprefix("data/")
+        old_file_path = os.path.join(settings.MEDIA_ROOT, relative_path)
+        if not os.path.exists(old_file_path):
+            return Response({'error': 'File not found'}, status=404)
+
+        # extract old filename and split parts
+        old_filename = os.path.basename(old_file_path)
+        prefix, rest = old_filename.split("-", 1)
+        rest_parts = rest.split("_")
+
+        # replace only the bib part
+        rest_parts[0] = str(new_bib)
+        new_filename = f"{prefix}-{'_'.join(rest_parts)}"
+        new_file_path = os.path.join(os.path.dirname(old_file_path), new_filename)
+
+        # rename file on disk
+        os.rename(old_file_path, new_file_path)
+
+        # update task.data URL
+        new_file_url = "/".join(old_file_url.split("/")[:-1] + [new_filename])
+        old_key = list(task.data.keys())[0]
+        task.data['image'] = new_file_url  # always enforce key to 'image'
+        if old_key != 'image':
+            task.data.pop(old_key, None)
+        task.save(update_fields=['data'])
+
+        # also update file_upload if present
+        if task.file_upload:
+            # update underlying file path so LS can serve it
+            relative_new_path = os.path.relpath(new_file_path, settings.MEDIA_ROOT).replace("\\", "/")
+            task.file_upload.file.name = relative_new_path
+            task.file_upload.save(update_fields=['file'])
+
+        return Response({'success': True, 'new_file': new_file_url})
+
 
 
 @method_decorator(

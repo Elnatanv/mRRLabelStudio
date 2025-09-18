@@ -582,7 +582,9 @@ const Model = types
             ? self.convertVDimensionToPerc(self.height)
             : self.height,
         rotation: self.rotation,
+        category: self.category,
         detectedColor: self.detectedColor,
+        category: self.category,
         brand: self.brand,
         shoeModel: self.shoeModel,
         bibId: self.bibId,

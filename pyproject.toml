@@ -4,18 +4,19 @@ version = "1.22.0.dev0"
 description = "Label Studio annotation tool"
 readme = "README.md"
 license = "Apache-2.0"
-authors = ["HumanSignal <support@humansignal.com>"]
+authors = [{ name = "HumanSignal", email = "support@humansignal.com" }]
 
 [tool.poetry]
 name = "label-studio"
 version = "1.22.0.dev0"
 description = "Label Studio annotation tool"
-authors = ["HumanSignal <support@humansignal.com>"]
+authors = ["HumanSignal <support@humansignal.com>"]  # Optional, used for legacy Poetry support
 readme = "README.md"
 license = "Apache-2.0"
 packages = [
     { include = "label_studio" },
 ]
+
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4"

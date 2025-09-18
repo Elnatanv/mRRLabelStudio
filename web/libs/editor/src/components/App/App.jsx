@@ -74,7 +74,10 @@ class App extends Component {
   renderSuccess() {
     return (
       <Block name="editor">
-        <Result status="success" title={getEnv(this.props.store).messages.DONE} />
+        <Result
+          status="success"
+          title={getEnv(this.props.store).messages.DONE}
+        />
       </Block>
     );
   }
@@ -82,7 +85,10 @@ class App extends Component {
   renderNoAnnotation() {
     return (
       <Block name="editor">
-        <Result status="success" title={getEnv(this.props.store).messages.NO_COMP_LEFT} />
+        <Result
+          status="success"
+          title={getEnv(this.props.store).messages.NO_COMP_LEFT}
+        />
       </Block>
     );
   }
@@ -99,8 +105,13 @@ class App extends Component {
           paddingBottom: "30vh",
         }}
       >
-        <Result status="success" title={getEnv(this.props.store).messages.NO_NEXT_TASK} />
-        <Block name="sub__result">All tasks in the queue have been completed</Block>
+        <Result
+          status="success"
+          title={getEnv(this.props.store).messages.NO_NEXT_TASK}
+        />
+        <Block name="sub__result">
+          All tasks in the queue have been completed
+        </Block>
         {store.taskHistory.length > 0 && (
           <Button
             onClick={(e) => store.prevTask(e, true)}
@@ -118,7 +129,10 @@ class App extends Component {
   renderNoAccess() {
     return (
       <Block name="editor">
-        <Result status="warning" title={getEnv(this.props.store).messages.NO_ACCESS} />
+        <Result
+          status="warning"
+          title={getEnv(this.props.store).messages.NO_ACCESS}
+        />
       </Block>
     );
   }
@@ -127,9 +141,13 @@ class App extends Component {
     return (
       <Block name="main-view">
         <Elem name="annotation">
-          <TreeValidation errors={this.props.store.annotationStore.validation} />
+          <TreeValidation
+            errors={this.props.store.annotationStore.validation}
+          />
         </Elem>
-        {!isFF(FF_DEV_3873) && store.hasInterface("infobar") && <Elem name="infobar">Task #{store.task.id}</Elem>}
+        {!isFF(FF_DEV_3873) && store.hasInterface("infobar") && (
+          <Elem name="infobar">Task #{store.task.id}</Elem>
+        )}
       </Block>
     );
   }
@@ -142,13 +160,20 @@ class App extends Component {
     if (as.viewingAll) return this.renderAllAnnotations();
 
     return (
-      <Block key={(as.selectedHistory ?? as.selected)?.id} name="main-view" onScrollCapture={this._notifyScroll}>
+      <Block
+        key={(as.selectedHistory ?? as.selected)?.id}
+        name="main-view"
+        onScrollCapture={this._notifyScroll}
+      >
         <Elem name="annotation">
           {<Annotation root={root} annotation={as.selected} />}
           {this.renderRelations(as.selected)}
-          {isFF(FF_PER_FIELD_COMMENTS) && this.renderCommentsOverlay(as.selected)}
+          {isFF(FF_PER_FIELD_COMMENTS) &&
+            this.renderCommentsOverlay(as.selected)}
         </Elem>
-        {!isFF(FF_DEV_3873) && getRoot(as).hasInterface("infobar") && this._renderInfobar(as)}
+        {!isFF(FF_DEV_3873) &&
+          getRoot(as).hasInterface("infobar") &&
+          this._renderInfobar(as)}
       </Block>
     );
   }
@@ -196,8 +221,17 @@ class App extends Component {
     const { store } = this.props;
     const { commentStore } = store;
 
-    if (!store.hasInterface("annotations:comments") || !commentStore.isCommentable) return null;
-    return <CommentsOverlay commentStore={commentStore} annotation={selectedAnnotation} />;
+    if (
+      !store.hasInterface("annotations:comments") ||
+      !commentStore.isCommentable
+    )
+      return null;
+    return (
+      <CommentsOverlay
+        commentStore={commentStore}
+        annotation={selectedAnnotation}
+      />
+    );
   }
 
   render() {
@@ -220,14 +254,20 @@ class App extends Component {
 
     // tags can be styled in config when user is awaiting for suggestions from ML backend
     const mainContent = (
-      <Block name="main-content" mix={store.awaitingSuggestions ? ["requesting"] : []}>
+      <Block
+        name="main-content"
+        mix={store.awaitingSuggestions ? ["requesting"] : []}
+      >
         {as.validation === null
           ? this._renderUI(as.selectedHistory?.root ?? root, as)
           : this.renderConfigValidationException(store)}
       </Block>
     );
 
-    const isBulkMode = isFF(FF_BULK_ANNOTATION) && !isSelfServe() && store.hasInterface("annotation:bulk");
+    const isBulkMode =
+      isFF(FF_BULK_ANNOTATION) &&
+      !isSelfServe() &&
+      store.hasInterface("annotation:bulk");
     const newUIEnabled = isFF(FF_DEV_3873);
 
     return (
@@ -243,7 +283,11 @@ class App extends Component {
               <InstructionsModal
                 visible={store.showingDescription}
                 onCancel={() => store.toggleDescription()}
-                title={store.hasInterface("review") ? "Review Instructions" : "Labeling Instructions"}
+                title={
+                  store.hasInterface("review")
+                    ? "Review Instructions"
+                    : "Labeling Instructions"
+                }
               >
                 {store.description}
               </InstructionsModal>
@@ -252,13 +296,19 @@ class App extends Component {
                 {store.showingDescription && (
                   <div className="p-base mb-base">
                     {/* biome-ignore lint/security/noDangerouslySetInnerHtml: we need html here and it's sanitized */}
-                    <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(store.description) }} />
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: sanitizeHtml(store.description),
+                      }}
+                    />
                   </div>
                 )}
               </>
             )}
 
-            {isDefined(store) && store.hasInterface("topbar") && <TopBar store={store} />}
+            {isDefined(store) && store.hasInterface("topbar") && (
+              <TopBar store={store} />
+            )}
             <Block
               name="wrapper"
               mod={{
@@ -271,7 +321,9 @@ class App extends Component {
                 isBulkMode || !store.hasInterface("side-column") ? (
                   <>
                     {mainContent}
-                    {store.hasInterface("topbar") && <BottomBar store={store} />}
+                    {store.hasInterface("topbar") && (
+                      <BottomBar store={store} />
+                    )}
                   </>
                 ) : (
                   <SideTabsPanels
@@ -279,10 +331,14 @@ class App extends Component {
                     currentEntity={as.selectedHistory ?? as.selected}
                     regions={as.selected.regionStore}
                     showComments={store.hasInterface("annotations:comments")}
-                    focusTab={store.commentStore.tooltipMessage ? "comments" : null}
+                    focusTab={
+                      store.commentStore.tooltipMessage ? "comments" : null
+                    }
                   >
                     {mainContent}
-                    {store.hasInterface("topbar") && <BottomBar store={store} />}
+                    {store.hasInterface("topbar") && (
+                      <BottomBar store={store} />
+                    )}
                   </SideTabsPanels>
                 )
               ) : isBulkMode || !store.hasInterface("side-column") ? (

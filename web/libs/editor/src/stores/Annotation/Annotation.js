@@ -844,7 +844,7 @@ const _Annotation = types
       // if this is now a history item or prediction don't save it
       if (!self.editable) return;
 
-      const result = self.serializeAnnotation({ fast: true });
+      const result = self.serializeAnnotation({ fast: true, isDraft: true });
       // if this is new annotation and no regions added yet
 
       if (!isFF(FF_LSDV_3009) && !self.pk && !result.length) return;
@@ -1143,35 +1143,39 @@ const _Annotation = types
         task.bibId,
         task.eventId
       );
-      const clothingForDb = result.map((res) => ({
-        type: res.value[res.type][0],
-        colors: res.detectedColor,
-        brand: res.brand,
-        shoeModel: res.shoeModel ? res.shoeModel : null,
-      }));
-      //TODO:: store the info to db
-      console.log("getting ready for db clothing", clothingForDb);
-      const apiUrl =
-        "https://api.myracereel.com/api/athletes/:bib/:eventId/updateAthleteClothings";
+      const clothingForDb = result.map((res) => {
+        return {
+          type: res.value[res.type][0],
+          colors: res.detectedColor,
+          brand: res.brand,
+          shoeModel: res.shoeModel ? res.shoeModel : null,
+          category: res.category,
+        };
+      });
+      if (!options.isDraft) {
+        //TODO:: store the info to db
+        console.log("getting ready for db clothing", clothingForDb);
+        const apiUrl =
+          "https://api.myracereel.com/api/athletes/:bib/:eventId/updateAthleteClothings";
 
-      fetch(
-        apiUrl.replace(":bib", task.bibId).replace(":eventId", task.eventId),
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ clothings: clothingForDb }),
-        }
-      )
-        .then((response) => response.json())
-        .then((data) => {
-          console.log("Success:", data);
-        })
-        .catch((error) => {
-          console.error("Error:", error);
-        });
-
+        fetch(
+          apiUrl.replace(":bib", task.bibId).replace(":eventId", task.eventId),
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ clothings: clothingForDb }),
+          }
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("Success:", data);
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      }
       return result;
     },
 

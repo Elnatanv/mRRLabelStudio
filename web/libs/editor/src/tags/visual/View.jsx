@@ -135,7 +135,13 @@ const Model = types
     },
   }));
 
-const ViewModel = types.compose("ViewModel", TagAttrs, Model, VisibilityMixin, AnnotationMixin);
+const ViewModel = types.compose(
+  "ViewModel",
+  TagAttrs,
+  Model,
+  VisibilityMixin,
+  AnnotationMixin
+);
 
 const HtxView = observer(({ item }) => {
   let style = {};

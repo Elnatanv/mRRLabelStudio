@@ -31,7 +31,11 @@ export default inject("store")(
     const updateButtonClassName = cn("update-btn").toClassName();
 
     if (store.task) {
-      taskInformation = <h4 className={`${styles.task} ${taskInfoClassName}`}>Task ID: {store.task.id}</h4>;
+      taskInformation = (
+        <h4 className={`${styles.task} ${taskInfoClassName}`}>
+          Task ID: {store.task.id}
+        </h4>
+      );
     }
 
     /**
@@ -68,7 +72,10 @@ export default inject("store")(
         );
       }
 
-      if ((userGenerate && !sentUserGenerate) || (store.explore && !userGenerate && store.hasInterface("submit"))) {
+      if (
+        (userGenerate && !sentUserGenerate) ||
+        (store.explore && !userGenerate && store.hasInterface("submit"))
+      ) {
         submitButton = (
           <Button
             disabled={disabled}
@@ -83,7 +90,10 @@ export default inject("store")(
         );
       }
 
-      if ((userGenerate && sentUserGenerate) || (!userGenerate && store.hasInterface("update"))) {
+      if (
+        (userGenerate && sentUserGenerate) ||
+        (!userGenerate && store.hasInterface("update"))
+      ) {
         updateButton = (
           <Button
             disabled={disabled}
@@ -93,7 +103,8 @@ export default inject("store")(
             tooltip="Update this task: [ Alt+Enter ]"
             className={updateButtonClassName}
           >
-            {sentUserGenerate || versions.result ? "Update" : "Submit"} {buttons.update}
+            {sentUserGenerate || versions.result ? "Update" : "Submit"}{" "}
+            {buttons.update}
           </Button>
         );
       }
@@ -118,5 +129,5 @@ export default inject("store")(
     );
 
     return (item.type === "annotation" || store.explore) && content;
-  }),
+  })
 );

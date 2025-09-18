@@ -19,8 +19,8 @@ from data_manager.serializers import (
     ViewSerializer,
 )
 from django.conf import settings
-from django.db.models import Sum
-from django.db.models.functions import Coalesce
+from django.db.models import Sum, TextField
+from django.db.models.functions import Coalesce, Cast
 from django.utils.decorators import method_decorator
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.types import OpenApiTypes
@@ -319,6 +319,7 @@ class TaskListAPI(generics.ListCreateAPIView):
     pagination_class = TaskPagination
 
     def get_task_serializer_context(self, request, project, queryset):
+        
         all_fields = request.GET.get('fields', None) == 'all'  # false by default
 
         return {
@@ -364,9 +365,24 @@ class TaskListAPI(generics.ListCreateAPIView):
         # get prepare params (from view or from payload directly)
         prepare_params = get_prepare_params(request, project)
         queryset = self.get_task_queryset(request, prepare_params)
+        # --- your custom filter ---
+        image_name = request.GET.get('image_name')
+        if image_name:
+            queryset = queryset.annotate(
+                data_text=Cast('data', TextField())
+            ).filter(data_text__icontains=image_name)
 
+             
         # paginated tasks
         page = self.paginate_queryset(queryset)
+
+        # --- Python-side split filtering ---
+        if image_name and page is not None:
+            page = [
+                task for task in page
+                if len(task.data_text.split('-')) > 1 and
+                task.data_text.split('-')[1].split('_')[0] == image_name
+            ]
 
         # get request params
         all_fields = 'all' if request.GET.get('fields', None) == 'all' else None

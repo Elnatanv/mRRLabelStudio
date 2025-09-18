@@ -383,6 +383,7 @@ const SelectedRegion: FC<{
   const [accentHex, setAccentHex] = useState(
     region?.detectedColor?.accent?.color || "#ffffff"
   );
+  
   const [brands, setBrands] = useState<string[]>([]);
   const [brand, setBrand] = useState(region?.brand || null);
   const [shoeModels, setShoeModels] = useState<string[]>([]);
@@ -392,6 +393,7 @@ const SelectedRegion: FC<{
   const isShoesRegion = region?.labelName.toLowerCase() === "shoes";
 
   useEffect(() => {
+    region.setCategory(region.tag.name)
     setBibId(fullImageUrl.split("-")[1].split("_")[0]);
     setEventId(fullImageUrl.split("-")[1].split("_")[1]);
 

@@ -98,6 +98,7 @@ const Result = types
     ),
     detectedColor: types.optional(types.frozen(), {}),
     brand: types.maybe(types.string),
+    category: types.maybe(types.string),
     shoeModel: types.maybe(types.string),
     bibId: types.maybe(types.string),
     eventId: types.maybe(types.string),
@@ -391,6 +392,7 @@ const Result = types
       const from_name = Tree.cleanUpId(sn.from_name);
       const to_name = Tree.cleanUpId(sn.to_name);
       const detectedColor = self.area.detectedColor;
+      const category = self.area.category;
       const brand = self.area.brand;
       const shoeModel = self.area.shoeModel;
       const task = self.store.task;
@@ -432,6 +434,7 @@ const Result = types
         to_name,
         type,
         detectedColor,
+        category,
         brand,
         shoeModel,
         bibId,
