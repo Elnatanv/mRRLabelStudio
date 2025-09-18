@@ -38,13 +38,13 @@ export default function ImageGallery({ projectId, imageName, taskId }) {
           key={task.id}
           className="cursor-pointer rounded shadow"
           style={{
-            width: "120px", // adjust width
-            height: "250px", // adjust height
+            width: "120px",
+            height: "300px",
             border: task.id === taskId ? "2px solid #FF69B4" : "none",
             backgroundImage: `url(${task.data.image})`,
-            backgroundSize: "cover", // fill div
-            backgroundPosition: "center", // center image
-            backgroundRepeat: "no-repeat", // prevent tiling
+            backgroundSize: "contain",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
           }}
           onClick={() =>
             (window.location.href = `/projects/${projectId}/data?tab=4&task=${task.id}`)
