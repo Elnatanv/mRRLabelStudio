@@ -11,7 +11,7 @@ export default function ImageGallery({ projectId, imageName, taskId }) {
       setLoading(true);
       try {
         const res = await fetch(
-          `http://localhost:8010/api/tasks/?project=${projectId}&image_name=${imageName}`
+          `/api/tasks/?project=${projectId}&image_name=${imageName}`
         );
         const data = await res.json();
         setTasks(data.tasks || []);
