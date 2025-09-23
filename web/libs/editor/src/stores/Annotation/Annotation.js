@@ -1152,7 +1152,7 @@ const _Annotation = types
           category: res.category,
         };
       });
-      if (!options.isDraft) {
+      if (!options?.isDraft) {
         //TODO:: store the info to db
         console.log("getting ready for db clothing", clothingForDb);
         const apiUrl =
