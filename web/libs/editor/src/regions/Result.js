@@ -97,11 +97,11 @@ const Result = types
       types.reference(types.union(...Registry.objectTypes()))
     ),
     detectedColor: types.optional(types.frozen(), {}),
-    brand: types.maybe(types.string),
-    category: types.maybe(types.string),
-    shoeModel: types.maybe(types.string),
-    bibId: types.maybe(types.string),
-    eventId: types.maybe(types.string),
+    brand: types.optional(types.union(types.string, types.null), null),
+    category: types.optional(types.union(types.string, types.null), null),
+    shoeModel: types.optional(types.union(types.string, types.null), null),
+    bibId: types.optional(types.union(types.string, types.null), null),
+    eventId: types.optional(types.union(types.string, types.null), null),
     // @todo some general type, maybe just a `string`
     type: ff.isActive(ff.FF_CUSTOM_TAGS)
       ? types.late(() =>

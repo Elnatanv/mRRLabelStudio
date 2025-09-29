@@ -10,15 +10,15 @@ import { types } from "mobx-state-tree";
 const NormalizationMixin = types
   .model({
     meta: types.frozen<{ text?: string[] }>({}),
-    brand: types.maybe(types.string), // store brand for the region
+    brand: types.optional(types.union(types.string, types.null), null),
     detectedColor: types.optional(
       types.frozen<Record<string, { value: string; color: string }>>(),
       {}
     ),
-    category: types.maybe(types.string),
-    shoeModel: types.maybe(types.string), // store shoe model for the region
-    bibId: types.maybe(types.string), // store bib id for the region
-    eventId: types.maybe(types.string), // store bib id for the region
+    category: types.optional(types.union(types.string, types.null), null),
+    shoeModel: types.optional(types.union(types.string, types.null), null),
+    bibId: types.optional(types.union(types.string, types.null), null),
+    eventId: types.optional(types.union(types.string, types.null), null),
   })
   .actions((self) => ({
     /**

@@ -25,8 +25,8 @@ const TaskStore = types
      * MST doesn't support processing of dynamic objects with unkown keys value
      */
     data: types.maybeNull(types.string),
-    bibId: types.maybeNull(types.string),
-    eventId: types.maybeNull(types.string),
+    bibId: types.optional(types.union(types.string, types.null), null),
+    eventId: types.optional(types.union(types.string, types.null), null),
     queue: types.optional(types.maybeNull(types.string), null),
   })
   .actions((self) => ({

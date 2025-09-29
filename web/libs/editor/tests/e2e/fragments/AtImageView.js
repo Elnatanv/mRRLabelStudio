@@ -13,8 +13,10 @@ module.exports = {
 
   _rootSelector: '[class^="lsf-object wrapperComponent--"]',
   _paginationSelector: '[class^="pagination--"]',
-  _paginationPrevBtnSelector: ".lsf-pagination__btn_arrow-left:not(.lsf-pagination__btn_arrow-left-double)",
-  _paginationNextBtnSelector: ".lsf-pagination__btn_arrow-right:not(.lsf-pagination__btn_arrow-right-double)",
+  _paginationPrevBtnSelector:
+    ".lsf-pagination__btn_arrow-left:not(.lsf-pagination__btn_arrow-left-double)",
+  _paginationNextBtnSelector:
+    ".lsf-pagination__btn_arrow-right:not(.lsf-pagination__btn_arrow-right-double)",
 
   locateRoot() {
     return locate(this._rootSelector);
@@ -160,7 +162,10 @@ module.exports = {
    * @param {number} tolerance
    */
   async hasPixelColor(x, y, rgbArray, tolerance = 3) {
-    const colorPixels = await I.executeScript(Helpers.getKonvaPixelColorFromPoint, [x, y]);
+    const colorPixels = await I.executeScript(
+      Helpers.getKonvaPixelColorFromPoint,
+      [x, y]
+    );
     const hasPixel = Helpers.areEqualRGB(rgbArray, colorPixels, tolerance);
 
     return hasPixel;
@@ -168,7 +173,10 @@ module.exports = {
 
   // Only for debugging
   async whereIsPixel(rgbArray, tolerance = 3) {
-    const points = await I.executeScript(Helpers.whereIsPixel, [rgbArray, tolerance]);
+    const points = await I.executeScript(Helpers.whereIsPixel, [
+      rgbArray,
+      tolerance,
+    ]);
 
     return points;
   },
@@ -180,7 +188,9 @@ module.exports = {
   },
 
   async isTransformerExist() {
-    const isTransformerExist = await I.executeScript(Helpers.isTransformerExist);
+    const isTransformerExist = await I.executeScript(
+      Helpers.isTransformerExist
+    );
 
     return isTransformerExist;
   },
@@ -239,7 +249,11 @@ module.exports = {
     I.moveMouse(this.stageBBox().x + x, this.stageBBox().y + y);
     I.pressMouseDown();
     I.waitTicks(1);
-    I.moveMouse(this.stageBBox().x + x + shiftX, this.stageBBox().y + y + shiftY, 3);
+    I.moveMouse(
+      this.stageBBox().x + x + shiftX,
+      this.stageBBox().y + y + shiftY,
+      3
+    );
     I.waitTicks(1);
     I.pressMouseUp();
     I.waitTicks(1);
@@ -264,7 +278,10 @@ module.exports = {
       I.waitTicks(3); // wait before last click to fix polygons creation
     }
 
-    I.clickAt(this.stageBBox().x + lastPoint[0], this.stageBBox().y + lastPoint[1]);
+    I.clickAt(
+      this.stageBBox().x + lastPoint[0],
+      this.stageBBox().y + lastPoint[1]
+    );
   },
   /**
    * Mousedown - mousemove - mouseup drawing through the list of points on the ImageView. Works in couple of lookForStage.
@@ -279,17 +296,25 @@ module.exports = {
     I.scrollPageToTop();
     const calcSteps = {
       steps: () => parameter,
-      rate: (p1, p2) => Math.sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2) / parameter,
+      rate: (p1, p2) =>
+        Math.sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2) / parameter,
     }[mode];
     const startPoint = points[0];
 
-    I.moveMouse(this.stageBBox().x + startPoint[0], this.stageBBox().y + startPoint[1]);
+    I.moveMouse(
+      this.stageBBox().x + startPoint[0],
+      this.stageBBox().y + startPoint[1]
+    );
     I.pressMouseDown();
     for (let i = 1; i < points.length; i++) {
       const prevPoint = points[i - 1];
       const curPoint = points[i];
 
-      I.moveMouse(this.stageBBox().x + curPoint[0], this.stageBBox().y + curPoint[1], calcSteps(prevPoint, curPoint));
+      I.moveMouse(
+        this.stageBBox().x + curPoint[0],
+        this.stageBBox().y + curPoint[1],
+        calcSteps(prevPoint, curPoint)
+      );
     }
     I.pressMouseUp();
   },
@@ -351,7 +376,9 @@ module.exports = {
   },
 
   hasSelectedTool(toolCode) {
-    I.seeElement(`.lsf-tool_active${this.locateToolByCode(toolCode).toString()}`);
+    I.seeElement(
+      `.lsf-tool_active${this.locateToolByCode(toolCode).toString()}`
+    );
   },
 
   async multiImageGoForwardWithHotkey() {

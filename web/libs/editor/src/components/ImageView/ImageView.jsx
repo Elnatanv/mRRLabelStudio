@@ -146,6 +146,13 @@ const DrawingRegion = observer(({ item }) => {
   const isBrush = drawingRegion.type === "brushregion";
   const Wrapper = drawingRegion && isBrush ? Fragment : Layer;
 
+  const fullimage = item.currentImageEntity?.src || "";
+  const bibId = fullimage.split("-")[1].split("_")[0];
+  const eventId = fullimage.split("-")[1].split("_")[1];
+  console.log("DrawingRegion bibId, eventId", fullimage, bibId, eventId);
+  drawingRegion.setBibId(bibId);
+  drawingRegion.setEventId(eventId);
+
   return (
     <Wrapper imageSmoothingEnabled={item.smoothing}>
       {drawingRegion ? (
