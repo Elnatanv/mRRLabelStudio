@@ -54,10 +54,15 @@ const AthleteClothingsInfo = ({ athleteClothingsData }) => {
                     Object.entries(clothing.colors).map(
                       ([key, { color, value }], idx) => (
                         <div key={idx}>
-                          {key}: {value}
+                          <b>{key}:</b> {value}
                         </div>
                       )
                     )}
+                  {clothing.brand && (
+                    <div>
+                      <b>Brand:</b> {clothing.brand}
+                    </div>
+                  )}
                 </div>
                 {index !== athleteClothingsData.length - 1 && (
                   <div
